@@ -1,6 +1,10 @@
-import middy from "@middy/core"
-import middyJsonBodyParser from "@middy/http-json-body-parser"
+import type {APIGatewayProxyHandler} from 'aws-lambda'
+import type {ValidatedEventAPIGatewayProxyEvent} from '@libs/apiGateway'
 
-export const middyfy = (handler) => {
-  return middy(handler).use(middyJsonBodyParser())
+export const parseBodyMiddleware = (
+	handler: ValidatedEventAPIGatewayProxyEvent<any>
+): APIGatewayProxyHandler => (event, ...args) => {
+	const eventWithBody = {...event, body: JSON.parse(event.body)}
+
+	return handler(eventWithBody, ...args)
 }
