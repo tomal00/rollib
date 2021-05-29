@@ -8,7 +8,7 @@ import {formatJSONResponse} from '@libs/apiGateway'
 const INVALID_PROFILE_URL_ERR = new Error('Invalid profile URL')
 
 const getOwnedProducts: ValidatedEventAPIGatewayProxyEvent<null> = async (event) => {
-	const {queryStringParameters: {profileUrl: profileUrlEncoded} = {}} = event
+	const {profileUrl: profileUrlEncoded} = event.queryStringParameters || {}
 	const profileUrl = decodeURI(profileUrlEncoded)
 	let steamId = profileUrl.match(/https:\/\/steamcommunity.com\/profiles\/(\d+)/)?.[1]
 
