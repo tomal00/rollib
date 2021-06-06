@@ -3,11 +3,12 @@
 @tailwind utilities;
 
 @layer base {
-    button, input {
-        @apply focus:outline-none rounded p-2 box-content;;
-    }
-  }
+	button,
+	input {
+		@apply focus:outline-none rounded p-2 box-content;
+	}
+}
 
 .color-transition {
-    @apply transition-colors duration-150;
+	@apply transition-colors duration-150;
 }

@@ -1,18 +1,23 @@
 import {useState} from 'preact/hooks'
-import ProfileSelection from './ProfileSelection'
-import useSteamLibrary from '../hooks/useSteamLibrary'
+import ProfileSelection from '@Components/profile-selection'
+import GamesSelection from '@Components/games-selection'
+import useSteamLibrary from '@Hooks/useSteamLibrary'
 
 const App = () => {
 	const [profileUrl, setProfileUrl] = useState('')
 	const {fetchSteamLibrary, steamLibrary} = useSteamLibrary(profileUrl)
 
 	return (
-		<div class="bg-gray-50 h-screen">
-			<ProfileSelection
-				onSubmit={fetchSteamLibrary}
-				profileUrl={profileUrl}
-				setProfileUrl={setProfileUrl}
-			/>
+		<div class="bg-red-900 min-h-screen h-full">
+			{steamLibrary ? (
+				<GamesSelection steamLibrary={steamLibrary} />
+			) : (
+				<ProfileSelection
+					onSubmit={fetchSteamLibrary}
+					profileUrl={profileUrl}
+					setProfileUrl={setProfileUrl}
+				/>
+			)}
 		</div>
 	)
 }

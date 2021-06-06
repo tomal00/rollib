@@ -1,7 +1,8 @@
 import {useState} from 'preact/hooks'
+import {SteamGame, SteamGameApi} from '@Types/steam'
 
 export default (profileUrl: string) => {
-	const [steamLibrary, setSteamLibrary] = useState([])
+	const [steamLibrary, setSteamLibrary] = useState<SteamGame[] | null>(null)
 	// Maybe create some api wrapper or add react-query + preact/compat
 	const fetchSteamLibrary = async () => {
 		try {
@@ -11,9 +12,16 @@ export default (profileUrl: string) => {
 
 			if (status >= 400) throw new Error(data.message)
 
-			setSteamLibrary(data.games)
+			setSteamLibrary(
+				data.games.map(({appid, img_icon_url, name}: SteamGameApi) => ({
+					appId: appid,
+					iconUrl: `http://media.steampowered.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`,
+					imageUrl: `https://steamcdn-a.akamaihd.net/steam/apps/${appid}/header.jpg`,
+					name,
+				}))
+			)
 		} catch (e) {
-			console.error(e)
+			alert(e)
 		}
 	}
 

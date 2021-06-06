@@ -16,7 +16,13 @@
 		"noEmit": true,
 		"jsx": "preserve",
 		"jsxFactory": "h",
-		"jsxFragmentFactory": "Fragment"
+		"jsxFragmentFactory": "Fragment",
+		"paths": {
+			"@Types/*": ["./src/types/*"],
+			"@Hooks/*": ["./src/hooks/*"],
+			"@Components/*": ["./src/components/*"],
+			"@Root/*": ["./src/*"]
+		}
 	},
 	"include": ["src"]
 }
