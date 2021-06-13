@@ -23,7 +23,7 @@ const ProfileSelection = ({onSubmit, profileUrl, setProfileUrl}: Props) => (
 				// Maybe add some proper validation
 				disabled={!profileUrl}
 				onClick={() => onSubmit(profileUrl)}
-				class="self-center">
+				class="self-center mt-2">
 				Load Steam Library
 			</Button>
 		</div>

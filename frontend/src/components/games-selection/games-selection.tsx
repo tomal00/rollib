@@ -7,18 +7,19 @@ import CheckBox from '@Components/common/checkbox'
 
 type Props = {
 	steamLibrary: SteamGame[]
+	onSpin: (games: SteamGame[]) => void
 }
 
 // TODO - Implement custom virtual list or use preact/compat and use some react lib
 // This is kinda important since now it's LAGGY AF (probably)
-const GamesSelection = ({steamLibrary}: Props) => {
+const GamesSelection = ({steamLibrary, onSpin}: Props) => {
 	const [filteredGames, setFilteredGames] = useState<{[key: string]: boolean}>({})
 	const [areFilteredHidden, setAreFilteredHidden] = useState<boolean>(false)
 	const [areSelectedHidden, setAreSelectedHidden] = useState<boolean>(false)
 	const [searchvalue, setSearchValue] = useState<string>('')
 	const handleSpin = () => {
 		const selection = steamLibrary.filter(({appId}) => !filteredGames[appId])
-		console.log('Selection', selection)
+		onSpin(selection)
 	}
 
 	const toggleGameFilter = (appId: number) =>
@@ -76,7 +77,9 @@ const GamesSelection = ({steamLibrary}: Props) => {
 						setAreSelectedHidden((e.target as HTMLInputElement).checked)
 					}}
 				/>
-				<Button onClick={handleSpin}>Spin</Button>
+				<Button class="mt-2" onClick={handleSpin}>
+					Spin
+				</Button>
 			</div>
 		</div>
 	)

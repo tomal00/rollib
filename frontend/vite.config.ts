@@ -7,6 +7,7 @@ export default defineConfig({
 	plugins: [preact()],
 	resolve: {
 		alias: {
+			'@Assets': path.resolve('./assets'),
 			'@Types': path.resolve('./src/types'),
 			'@Hooks': path.resolve('./src/hooks'),
 			'@Components': path.resolve('./src/components'),

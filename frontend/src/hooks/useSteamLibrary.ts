@@ -18,6 +18,7 @@ export default (profileUrl: string) => {
 					iconUrl: `http://media.steampowered.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`,
 					imageUrl: `https://steamcdn-a.akamaihd.net/steam/apps/${appid}/header.jpg`,
 					name,
+					url: `https://store.steampowered.com/app/${appid}`,
 				}))
 			)
 		} catch (e) {

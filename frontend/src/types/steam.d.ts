@@ -15,4 +15,5 @@ export type SteamGame = {
 	logoUrl: string
 	imageUrl: string
 	name: string
+	url: string
 }
