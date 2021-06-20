@@ -4,6 +4,7 @@ import Button from '@Components/common/button'
 type Props = {
 	game: SteamGame
 	onReroll: () => void
+	path: string
 }
 
 // Todo zjistit jestli jde redirectnout na url která by spustila steam hru přes browser??

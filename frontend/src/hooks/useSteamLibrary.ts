@@ -1,15 +1,19 @@
-import {useState} from 'preact/hooks'
+import {useState, useEffect, useRef} from 'preact/hooks'
+import {route} from 'preact-router'
 import {SteamGame, SteamGameApi} from '@Types/steam'
 
 export default (profileUrl: string) => {
-	const [steamLibrary, setSteamLibrary] = useState<SteamGame[] | null>(null)
-	// Maybe create some api wrapper or add react-query + preact/compat
-	const fetchSteamLibrary = async () => {
-		try {
-			const {data, status} = await fetch(
-				`http://127.0.0.1:3000/dev/owned-products?profileUrl=${profileUrl}`
-			).then((res) => res.json().then((data) => ({status: res.status, data})))
+	const [steamLibrary, setSteamLibrary] = useState<SteamGame[]>([])
+	const promiseRef = useRef<Promise<void | {status: number; data: any}> | null>(null)
+	const callbackRef = useRef<Function>()
 
+	useEffect(() => {
+		// Would be nice to use react-query instead of doing this hacky shit via refs
+		promiseRef.current = fetch(
+			`http://127.0.0.1:3000/dev/owned-products?profileUrl=${profileUrl}`
+		).then((res) => res.json().then((data) => ({status: res.status, data})))
+
+		callbackRef.current = ({data, status}: {data: any; status: number}) => {
 			if (status >= 400) throw new Error(data.message)
 
 			setSteamLibrary(
@@ -21,14 +25,22 @@ export default (profileUrl: string) => {
 					url: `https://store.steampowered.com/app/${appid}`,
 				}))
 			)
-		} catch (e) {
-			alert(e)
 		}
-	}
 
-	return {
-		profileUrl,
-		fetchSteamLibrary,
-		steamLibrary,
-	}
+		promiseRef.current
+			.then(({data, status} = {data: {}, status: 0}) => callbackRef.current({data, status}))
+			.catch((e) => {
+				route('/')
+				alert(e)
+			})
+
+		return () => {
+			// Set the cb to a blank function so that it doesn't setState when the component is unmounted
+			// Doesn't handle the case when the component stays mounted and the profileUrl changes, but the user
+			// doesn't have the ability to achieve this at the moment anyway.
+			callbackRef.current = () => null
+		}
+	}, [profileUrl])
+
+	return steamLibrary
 }

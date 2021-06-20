@@ -7,9 +7,13 @@
 		"serve": "vite preview"
 	},
 	"dependencies": {
+		"@types/lodash": "^4.14.170",
 		"classnames": "^2.3.1",
+		"lodash": "^4.17.21",
 		"preact": "^10.5.13",
-		"random-id": "^1.0.4"
+		"preact-router": "^3.2.1",
+		"random-id": "^1.0.4",
+		"react-tiny-virtual-list": "^2.2.0"
 	},
 	"devDependencies": {
 		"@preact/preset-vite": "^2.0.0",

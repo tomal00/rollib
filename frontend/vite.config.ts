@@ -12,6 +12,9 @@ export default defineConfig({
 			'@Hooks': path.resolve('./src/hooks'),
 			'@Components': path.resolve('./src/components'),
 			'@Root': path.resolve('./src'),
+			react: 'preact/compat',
+			'react-dom/test-utils': 'preact/test-utils',
+			'react-dom': 'preact/compat',
 		},
 	},
 	server: {
