@@ -1,11 +1,12 @@
 import {useState, useMemo} from 'preact/hooks'
 import classnames from 'classnames'
 import VirtualList from 'react-tiny-virtual-list'
-import {SteamGame} from '@Types/steam'
+import {route} from 'preact-router'
+import {useQuery} from 'react-query'
+import {SteamGame, SteamGameApi} from '@Types/steam'
 import Button from '@Components/common/button'
 import TextInput from '@Components/common/text-input'
 import CheckBox from '@Components/common/checkbox'
-import useSteamLibrary from '@Hooks/useSteamLibrary'
 import useWindowSize from '@Hooks/useWindowSize'
 
 type Props = {
@@ -19,13 +20,36 @@ const ITEM_TOTAL_HEIGHT = 162.5
 const LIST_PADDING = 16
 const BOTTOM_BAR_HEIGHT = 144
 
+const fetchSteamLibrary = (profileUrl: string): Promise<SteamGame[]> =>
+	fetch(`http://127.0.0.1:3000/dev/owned-products?profileUrl=${profileUrl}`)
+		.then((res) => res.json().then((data) => ({status: res.status, data})))
+		.then(({status, data}) => {
+			if (status >= 400) throw new Error(data.message)
+
+			return data.games.map(({appid, img_icon_url, name}: SteamGameApi) => ({
+				appId: appid,
+				iconUrl: `http://media.steampowered.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`,
+				imageUrl: `https://steamcdn-a.akamaihd.net/steam/apps/${appid}/header.jpg`,
+				name,
+				url: `https://store.steampowered.com/app/${appid}`,
+			}))
+		})
+
 const GamesSelection = ({onSpin, matches}: Props) => {
 	const [filteredGames, setFilteredGames] = useState<{[key: string]: boolean}>({})
 	const [areFilteredHidden, setAreFilteredHidden] = useState<boolean>(false)
 	const [areSelectedHidden, setAreSelectedHidden] = useState<boolean>(false)
 	const [searchvalue, setSearchValue] = useState<string>('')
-	const steamLibrary = useSteamLibrary(matches?.profileUrl || '')
 	const windowSize = useWindowSize()
+	const profileUrl = matches?.profileUrl || ''
+	const {data: steamLibrary = []} = useQuery(profileUrl, () => fetchSteamLibrary(profileUrl), {
+		onError: (e) => {
+			route('/')
+			alert(e)
+		},
+		staleTime: Infinity,
+		retry: false,
+	})
 
 	const handleSpin = () => {
 		const selection = steamLibrary.filter(({appId}) => !filteredGames[appId])

@@ -8,11 +8,13 @@
 	},
 	"dependencies": {
 		"@types/lodash": "^4.14.170",
+		"@types/react-query": "^1.2.9",
 		"classnames": "^2.3.1",
 		"lodash": "^4.17.21",
 		"preact": "^10.5.13",
 		"preact-router": "^3.2.1",
 		"random-id": "^1.0.4",
+		"react-query": "^3.17.3",
 		"react-tiny-virtual-list": "^2.2.0"
 	},
 	"devDependencies": {

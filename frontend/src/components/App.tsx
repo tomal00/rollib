@@ -1,9 +1,12 @@
 import {useState, useRef} from 'preact/hooks'
 import Router, {route} from 'preact-router'
+import {QueryClient, QueryClientProvider} from 'react-query'
 import ProfileSelection from '@Components/profile-selection'
 import GamesSelection from '@Components/games-selection'
 import GamePreview from '@Components/game-preview'
 import {SteamGame} from '@Types/steam'
+
+const queryClient = new QueryClient()
 
 const App = () => {
 	const [selectedGame, setSelectedGame] = useState<SteamGame | null>(null)
@@ -11,7 +14,6 @@ const App = () => {
 	const handleSpin = (games: SteamGame[]) => {
 		lastFilteredSelection.current = games
 		setSelectedGame(games[Math.floor(Math.random() * games.length)])
-		// ok cuz the order of updates is respected
 		route(`/spin`)
 	}
 
@@ -28,15 +30,17 @@ const App = () => {
 	}
 
 	return (
-		<div class="bg-red-900 min-h-screen h-full">
-			<Router>
-				{selectedGame && (
-					<GamePreview path="/spin" game={selectedGame} onReroll={handleReroll} />
-				)}
-				<GamesSelection path="/library/:profileUrl" onSpin={handleSpin} />
-				<ProfileSelection onSubmit={handleSelectProfile} default path="/*" />
-			</Router>
-		</div>
+		<QueryClientProvider client={queryClient}>
+			<div class="bg-red-900 min-h-screen h-full">
+				<Router>
+					{selectedGame && (
+						<GamePreview path="/spin" game={selectedGame} onReroll={handleReroll} />
+					)}
+					<GamesSelection path="/library/:profileUrl" onSpin={handleSpin} />
+					<ProfileSelection onSubmit={handleSelectProfile} default path="/*" />
+				</Router>
+			</div>
+		</QueryClientProvider>
 	)
 }
 
