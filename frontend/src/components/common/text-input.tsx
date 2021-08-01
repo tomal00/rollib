@@ -1,19 +1,28 @@
 import {useState} from 'preact/hooks'
 import randomId from 'random-id'
+import classnames from 'classnames'
 
-const TextInput = ({label, ...props}: {label?: string; [key: string]: any}) => {
+const TextInput = ({label, inputClass, ...props}: {label?: string; [key: string]: any}) => {
 	const [id] = useState<string | undefined>(label ? () => randomId(10) : undefined)
 
 	return (
-		<div class="flex flex-col-reverse group text-black hover:text-red-400 sm:focus-within:text-red-600">
+		<div
+			class={classnames(
+				'flex flex-col-reverse group text-gray-400 hover:text-gray-300 sm:focus-within:text-purple-500',
+				props.class
+			)}>
 			<input
 				{...props}
-				class="p-2 w-72 md:w-96 border-2 text-current color-transition border-current bg-transparent placeholder-black"
+				class={classnames(
+					'border-b-2 color-transition border-current focus:border-purple-500 focus:text-gray-200 bg-transparent placeholder-gray-400',
+					!!label && 'mt-1',
+					inputClass
+				)}
 				type="text"
 				id={id}
 			/>
 			{label && (
-				<label for={id} class="text-current color-transition">
+				<label for={id} class="text-current text-xs color-transition">
 					{label}
 				</label>
 			)}

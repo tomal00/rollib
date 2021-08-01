@@ -3,12 +3,29 @@
 @tailwind utilities;
 
 @layer base {
+	* {
+		@apply text-gray-200;
+	}
+
 	button,
 	input {
-		@apply focus:outline-none rounded p-2 box-content;
+		@apply focus:outline-none box-content;
 	}
-}
 
-.color-transition {
-	@apply transition-colors duration-150;
+	.color-transition {
+		@apply transition-colors duration-150;
+	}
+	
+	.scrollbar::-webkit-scrollbar-track {
+		@apply bg-purple-400;
+	}
+	
+	.scrollbar::-webkit-scrollbar {
+		@apply bg-transparent;
+		width: 4px;
+	}
+	
+	.scrollbar::-webkit-scrollbar-thumb {
+		@apply bg-purple-600;
+	}
 }

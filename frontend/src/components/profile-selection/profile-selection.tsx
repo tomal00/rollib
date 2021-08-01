@@ -13,10 +13,11 @@ const ProfileSelection = ({onSubmit}: Props) => {
 
 	return (
 		<div class="min-h-screen h-full flex justify-center items-center">
-			<div class="flex flex-col justify-center">
+			<div class=" p-12 flex flex-col justify-center">
 				<TextInput
 					label="Profile URL"
 					placeholder="https://steamcommunity.com/id/sample-id"
+					inputClass="w-72 md:w-96"
 					type="text"
 					onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
 						setProfileUrl(e.currentTarget.value)
@@ -27,7 +28,7 @@ const ProfileSelection = ({onSubmit}: Props) => {
 					// Maybe add some proper validation
 					disabled={!profileUrl}
 					onClick={() => onSubmit(profileUrl)}
-					class="self-center mt-2">
+					class="self-center mt-4">
 					Load Steam Library
 				</Button>
 			</div>

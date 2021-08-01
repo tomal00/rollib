@@ -31,7 +31,7 @@ const App = () => {
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<div class="bg-red-900 min-h-screen h-full">
+			<div class="bg-gray-700 min-h-screen h-full">
 				<Router>
 					{selectedGame && (
 						<GamePreview path="/spin" game={selectedGame} onReroll={handleReroll} />
