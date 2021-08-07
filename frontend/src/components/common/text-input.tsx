@@ -2,7 +2,13 @@ import {useState} from 'preact/hooks'
 import randomId from 'random-id'
 import classnames from 'classnames'
 
-const TextInput = ({label, inputClass, ...props}: {label?: string; [key: string]: any}) => {
+type Props = {
+	label?: string
+	inputClass?: string
+	[key: string]: any
+}
+
+const TextInput = ({label, inputClass, ...props}: Props) => {
 	const [id] = useState<string | undefined>(label ? () => randomId(10) : undefined)
 
 	return (
@@ -29,5 +35,4 @@ const TextInput = ({label, inputClass, ...props}: {label?: string; [key: string]
 		</div>
 	)
 }
-
 export default TextInput

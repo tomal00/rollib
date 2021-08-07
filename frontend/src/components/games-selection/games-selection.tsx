@@ -1,12 +1,12 @@
-import {useState, useMemo} from 'preact/hooks'
+import {useState, useMemo, useEffect} from 'preact/hooks'
 import classnames from 'classnames'
 import VirtualList from 'react-tiny-virtual-list'
-import {route} from 'preact-router'
 import {useQuery} from 'react-query'
-import {SteamGame, SteamGameApi} from '@Types/steam'
+import {SteamGame} from '@Types/steam'
 import Button from '@Components/common/button'
 import TextInput from '@Components/common/text-input'
 import CheckBox from '@Components/common/checkbox'
+import GamePreview from '@Components/game-preview'
 import useWindowSize from '@Hooks/useWindowSize'
 
 type Props = {
@@ -17,8 +17,8 @@ type Props = {
 
 const ITEM_TOTAL_HEIGHT = 40
 
-const fetchSteamLibrary = (profileUrl: string): Promise<SteamGame[]> =>
-	fetch(`http://127.0.0.1:3000/dev/owned-products?profileUrl=${profileUrl}`)
+/*const fetchSteamLibrary = (profileUrl: string): Promise<SteamGame[]> =>
+	fetch(`http://127.0.0.1:3000/dev/steam-profile?profileUrl=${profileUrl}`)
 		.then((res) => res.json().then((data) => ({status: res.status, data})))
 		.then(({status, data}) => {
 			if (status >= 400) throw new Error(data.message)
@@ -31,7 +31,7 @@ const fetchSteamLibrary = (profileUrl: string): Promise<SteamGame[]> =>
 				url: `https://store.steampowered.com/app/${appid}`,
 			}))
 		})
-
+*/
 const GamesSelection = ({onSpin, matches}: Props) => {
 	const {height: windowHeight} = useWindowSize()
 	const [filteredGames, setFilteredGames] = useState<{[key: string]: boolean}>({})
@@ -41,8 +41,10 @@ const GamesSelection = ({onSpin, matches}: Props) => {
 	const profileUrl = matches?.profileUrl || ''
 	const {data: steamLibrary = []} = useQuery(profileUrl, () => fetchSteamLibrary(profileUrl), {
 		onError: (e) => {
-			route('/')
 			alert(e)
+		},
+		onSuccess: (steamLibrary) => {
+			setSelectedGame(steamLibrary[0])
 		},
 		staleTime: Infinity,
 		retry: false,
@@ -80,64 +82,62 @@ const GamesSelection = ({onSpin, matches}: Props) => {
 
 	// TODO - some loading state would be nice
 	return (
-		<div class="flex h-screen">
-			<div>
-				<div class="w-72 h-full flex flex-col p-2">
-					<div>
-						<TextInput
-							value={searchvalue}
-							placeholder="Search..."
-							class=""
-							onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
-								setSearchValue(e.currentTarget.value)
-							}
-						/>
-						<CheckBox
-							label="Hide filtered"
-							class="my-2"
-							onChange={(e: JSX.TargetedEvent<HTMLInputElement, Event>) => {
-								setShowOnlyExcluded((e.target as HTMLInputElement).checked)
-							}}
-						/>
-					</div>
-					<VirtualList
-						width="100%"
-						/*
-						Won't actually make the list overflow, height just handles how
-						many children are rendered in the dom.
-						*/
-						height={windowHeight}
-						class="scrollbar pr-1"
-						itemCount={games.length}
-						itemSize={ITEM_TOTAL_HEIGHT}
-						renderItem={({
-							index,
-							style,
-						}: {
-							index: number
-							style: string | JSX.CSSProperties | undefined
-						}) => {
-							const game = games[index]
-							const isSelected = selectedGame === game
-							return (
-								<div key={index} style={style}>
-									<button
-										onClick={() => setSelectedGame(game)}
-										class={classnames(
-											'flex flex-nowrap align box-border w-full items-center p-1 px-2 color-transition',
-											isSelected && 'bg-purple-600'
-										)}>
-										<img class="h-8 w-8" src={game.iconUrl} />
-										<span class="ml-2 truncate">{game.name}</span>
-									</button>
-								</div>
-							)
+		<div class="flex h-screen justify-center px-24 py-12">
+			<div class="w-72 h-full flex flex-col p-4 mr-12 bg-purple-600 bg-opacity-5">
+				<div>
+					<TextInput
+						value={searchvalue}
+						placeholder="Search..."
+						class=""
+						onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+							setSearchValue(e.currentTarget.value)
+						}
+					/>
+					<CheckBox
+						label="Show only excluded"
+						class="my-2"
+						onChange={(e: JSX.TargetedEvent<HTMLInputElement, Event>) => {
+							setShowOnlyExcluded((e.target as HTMLInputElement).checked)
 						}}
 					/>
 				</div>
+				<VirtualList
+					width="100%"
+					/*
+						Won't actually make the list overflow, height just handles how
+						many children are rendered in the dom.
+						*/
+					height={windowHeight}
+					class="scrollbar pr-1"
+					itemCount={games.length}
+					itemSize={ITEM_TOTAL_HEIGHT}
+					renderItem={({
+						index,
+						style,
+					}: {
+						index: number
+						style: string | JSX.CSSProperties | undefined
+					}) => {
+						const game = games[index]
+						const isSelected = selectedGame === game
+						return (
+							<div key={index} style={style}>
+								<button
+									onClick={() => setSelectedGame(game)}
+									class={classnames(
+										'flex flex-nowrap align box-border w-full items-center py-1 px-2 color-transition',
+										isSelected && 'bg-purple-600'
+									)}>
+									<img class="h-8 w-8" src={game.iconUrl} />
+									<span class="ml-2 truncate">{game.name}</span>
+								</button>
+							</div>
+						)
+					}}
+				/>
 			</div>
 			<div>
-				<div>tady bude preview selectnutýho</div>
+				{selectedGame && <GamePreview game={selectedGame} />}
 				<Button disabled={!steamLibrary.length} onClick={handleSpin}>
 					Spin
 				</Button>

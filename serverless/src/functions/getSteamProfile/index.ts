@@ -6,7 +6,7 @@ export default {
 		{
 			http: {
 				method: 'get',
-				path: 'owned-products',
+				path: 'steam-profile',
 			},
 		},
 	],

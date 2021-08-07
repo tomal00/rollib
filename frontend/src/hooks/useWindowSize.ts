@@ -5,6 +5,7 @@ const useWindowSize = () => {
 	const [windowSize, setWindowSize] = useState(() => ({
 		width: window.innerWidth,
 		height: window.innerHeight,
+		scrollWidth: document.body.scrollWidth,
 	}))
 
 	useEffect(() => {
@@ -12,6 +13,7 @@ const useWindowSize = () => {
 			setWindowSize({
 				width: window.innerWidth,
 				height: window.innerHeight,
+				scrollWidth: document.body.scrollWidth,
 			})
 		}
 

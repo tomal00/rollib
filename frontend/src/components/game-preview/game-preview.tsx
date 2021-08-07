@@ -1,11 +1,8 @@
 import {useQuery} from 'react-query'
 import {SteamGame} from '@Types/steam'
-import Button from '@Components/common/button'
 
 type Props = {
 	game: SteamGame
-	onReroll: () => void
-	path: string
 }
 
 // TODO properly type the full info
@@ -18,7 +15,7 @@ const fetchGameFullInfo = (appId: number) =>
 
 // Todo zjistit jestli jde redirectnout na url která by spustila steam hru přes browser??
 // Myslim že ten shit jde přes oficiální stránky but not sure
-const GamePreview = ({game, onReroll}: Props) => {
+const GamePreview = ({game}: Props) => {
 	/*
 	Won't work cuz CORS
 	TODO - proxy lambda for full game info
@@ -29,16 +26,25 @@ const GamePreview = ({game, onReroll}: Props) => {
 	*/
 
 	return (
-		<div class="min-h-screen h-full flex flex-col justify-center items-center">
-			<div class="p-4 bg-red-700 rounded">
-				<a class="block" href={game.url} target="_blank" rel="noreferrer noopener">
-					<img class="rounded m-auto" src={game.imageUrl} />
-				</a>
-				<div class="text-2xl text-center mt-4">{game.name}</div>
+		<div class="flex flex-col p-8 box-content bg-purple-600 bg-opacity-5" style={{width: 460}}>
+			<div class="relative w-full" style={{height: 215}}>
+				<img src={game.imageUrl} class="min-h-24" />
+				<div class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-black to-transparent opacity-75" />
+				<div class="absolute left-0 bottom-0 p-3">
+					<div>64hrs played</div>
+					<a href={game.url} target="_blank" rel="noreferrer noopener">
+						store link
+					</a>
+				</div>
 			</div>
-			<Button class="mt-2" onClick={onReroll}>
-				Reroll
-			</Button>
+			<div class="text-sm max-h-48 overflow-auto scrollbar mt-4">
+				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+				incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+				exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+				irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+				pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+				deserunt mollit anim id est laborum.
+			</div>
 		</div>
 	)
 }

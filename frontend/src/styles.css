@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+	body {
+		min-width: 600px;
+	}
+
 	* {
 		@apply text-gray-200;
 	}
@@ -23,6 +27,7 @@
 	.scrollbar::-webkit-scrollbar {
 		@apply bg-transparent;
 		width: 4px;
+		height: 12px;
 	}
 	
 	.scrollbar::-webkit-scrollbar-thumb {
