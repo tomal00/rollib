@@ -4,7 +4,7 @@
 
 @layer base {
 	body {
-		min-width: 600px;
+		min-width: 1280px;
 	}
 
 	* {
