@@ -1,5 +1,5 @@
 import {useQuery} from 'react-query'
-import {useLayoutEffect, useState} from 'preact/hooks'
+import {useState} from 'preact/hooks'
 import {FunctionalComponent} from 'preact'
 import {QueryClient, QueryClientProvider} from 'react-query'
 import classnames from 'classnames'
@@ -43,10 +43,8 @@ const App = () => {
 				setProfileUrl('')
 				alert(e)
 			},
-			onSuccess: () => setSpinRound((spinRound) => ++spinRound),
 		}
 	)
-	const [spinRound, setSpinRound] = useState(0)
 	const games = steamProfile?.games || []
 
 	return (
@@ -69,7 +67,7 @@ const App = () => {
 					class={classnames('col-span-2 text-base', !steamProfile && 'opacity-30')}>
 					{steamProfile?.games.length
 						? `${steamProfile.games.length} games owned`
-						: 'Enter steam profile URL and click the "Roll" button'}
+						: 'Load a steam profile'}
 				</div>
 				<ProfileUrlSubmit onSubmit={setProfileUrl} />
 			</div>
@@ -78,42 +76,55 @@ const App = () => {
 	)
 }
 
+// TODO - contain all the cringe in this component
 const Games = ({games}: {games: SteamGame[]}) => {
-	const [didRerender, rerender] = useState(false)
-	useLayoutEffect(() => {
-		setTimeout(() => rerender(true), 500)
-	}, [])
-
+	const [visibleGames, setVisibleGames] = useState(games.slice(0, 5))
+	const [isRolling, setIsRolling] = useState(false)
+	const displayedGames = [
+		...visibleGames,
+		...games
+			.slice(0, 65) // TODO - make this random
+			.filter(({appId}) => !visibleGames.find((visibleGame) => visibleGame.appId === appId)),
+	]
+	const handleRoll = () => {
+		setIsRolling(true)
+		setTimeout(() => {
+			setVisibleGames(displayedGames.slice(-5))
+			setIsRolling(false)
+		}, 5250)
+	}
+	// TODO - some filters e.g. never played only
 	return (
-		<div style={{width: 4 * 240}} class="relative mt-24 overflow-hidden">
-			<div
-				class="flex"
-				style={{
-					transitionTimingFunction: 'cubic-bezier(0,0,0.33,1)',
-					transition: 'transform 5s',
-					transform: didRerender
-						? 'translateX(calc(-60.5 * 240px))'
-						: 'translateX(calc(-10.5 * 240px))',
-				}}>
-				{games.slice(0, 70).map((game) => (
-					<img
-						key={game.appId}
-						class="object-contain"
-						src={game.imageUrl}
-						alt={game.name}
-						style={{
-							width: 240,
-							minWidth: 240,
-						}}
-					/>
-				))}
+		<>
+			<div style={{width: 4 * 240}} class="relative mt-24 overflow-hidden">
+				<div
+					class={classnames('flex', isRolling && 'games-rolling-animation')}
+					style={{
+						transform: 'translateX(calc(-0.5 * 240px)',
+					}}>
+					{displayedGames.map((game) => (
+						<img
+							key={game.appId}
+							class="object-contain"
+							src={game.imageUrl}
+							alt={game.name}
+							style={{
+								width: 240,
+								minWidth: 240,
+							}}
+						/>
+					))}
+				</div>
+				<div
+					class="absolute h-full border-2 border-purple-700"
+					style={{left: '50%', transform: 'translateX(-50%)', top: 0, width: 240}}
+				/>
+				<div class="absolute top-0 w-full h-full bg-gradient-to-r from-gray-700 to-gray-700 via-transparent" />
 			</div>
-			<div
-				class="absolute h-full border-2 border-purple-700"
-				style={{left: '50%', transform: 'translateX(-50%)', top: 0, width: 240}}
-			/>
-			<div class="absolute top-0 w-full h-full bg-gradient-to-r from-gray-700 to-gray-700 via-transparent" />
-		</div>
+			<Button onClick={handleRoll} class="mt-4 w-24">
+				Roll
+			</Button>
+		</>
 	)
 }
 
@@ -138,7 +149,7 @@ const ProfileUrlSubmit = ({onSubmit}: {onSubmit: (profuleUrl: string) => void}) 
 				disabled={!value}
 				onClick={() => onSubmit(value)}
 				class="self-center place-self-center mt-4 w-24">
-				Roll
+				Load
 			</Button>
 		</>
 	)

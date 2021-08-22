@@ -33,4 +33,9 @@
 	.scrollbar::-webkit-scrollbar-thumb {
 		@apply bg-purple-600;
 	}
+
+	.games-rolling-animation {
+		@apply animate-roll;
+		animation-fill-mode: forwards;
+	}
 }
