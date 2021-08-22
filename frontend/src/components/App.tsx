@@ -1,5 +1,5 @@
 import {useQuery} from 'react-query'
-import {useEffect, useState} from 'preact/hooks'
+import {useLayoutEffect, useState} from 'preact/hooks'
 import {FunctionalComponent} from 'preact'
 import {QueryClient, QueryClientProvider} from 'react-query'
 import classnames from 'classnames'
@@ -43,8 +43,10 @@ const App = () => {
 				setProfileUrl('')
 				alert(e)
 			},
+			onSuccess: () => setSpinRound((spinRound) => ++spinRound),
 		}
 	)
+	const [spinRound, setSpinRound] = useState(0)
 	const games = steamProfile?.games || []
 
 	return (
@@ -71,22 +73,19 @@ const App = () => {
 				</div>
 				<ProfileUrlSubmit onSubmit={setProfileUrl} />
 			</div>
-			<Games games={games} />
+			{!!games.length && <Games games={games} />}
 		</div>
 	)
 }
 
 const Games = ({games}: {games: SteamGame[]}) => {
 	const [didRerender, rerender] = useState(false)
-	useEffect(() => {
-		rerender(true)
+	useLayoutEffect(() => {
+		setTimeout(() => rerender(true), 500)
 	}, [])
 
 	return (
-		<div
-			style={{width: 4 * 240}}
-			class="relative mt-24 overflow-hidden"
-			onClick={() => rerender(!didRerender)}>
+		<div style={{width: 4 * 240}} class="relative mt-24 overflow-hidden">
 			<div
 				class="flex"
 				style={{
@@ -110,9 +109,10 @@ const Games = ({games}: {games: SteamGame[]}) => {
 				))}
 			</div>
 			<div
-				class="absolute w-6 bg-black"
-				style={{left: '50%', transform: 'translateX(-50%)', top: 0}}
+				class="absolute h-full border-2 border-purple-700"
+				style={{left: '50%', transform: 'translateX(-50%)', top: 0, width: 240}}
 			/>
+			<div class="absolute top-0 w-full h-full bg-gradient-to-r from-gray-700 to-gray-700 via-transparent" />
 		</div>
 	)
 }
