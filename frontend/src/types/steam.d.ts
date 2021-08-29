@@ -5,6 +5,7 @@ export type SteamGame = {
 	imageUrl: string
 	name: string
 	url: string
+	key?: string
 }
 
 export type SteamProfile = {

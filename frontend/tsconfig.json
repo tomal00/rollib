@@ -23,6 +23,7 @@
 			"@Assets/*": ["./assets/*"],
 			"@Types/*": ["./src/types/*"],
 			"@Hooks/*": ["./src/hooks/*"],
+			"@Utils/*": ["./src/utils/*"],
 			"@Components/*": ["./src/components/*"],
 			"@Root/*": ["./src/*"]
 		}

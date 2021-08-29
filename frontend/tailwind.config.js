@@ -5,7 +5,7 @@ module.exports = {
 		extend: {
 			keyframes: {
 				roll: {
-					'0%, 10%': {
+					'0%, 5%': {
 						transform: 'translateX(calc(-0.5 * 240px))',
 					},
 					'100%': {
