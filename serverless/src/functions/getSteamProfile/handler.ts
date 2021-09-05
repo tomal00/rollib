@@ -59,22 +59,38 @@ const getSteamProfile: ValidatedEventAPIGatewayProxyEvent<null> = async (event) 
 			}),
 		])
 
-		return formatJSONResponse({
-			steamProfile: {
-				games: games.map(({appid, img_icon_url, name}) => ({
-					appId: appid,
-					iconUrl: `http://media.steampowered.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`,
-					imageUrl: `https://steamcdn-a.akamaihd.net/steam/apps/${appid}/header.jpg`,
-					name,
-					url: `https://store.steampowered.com/app/${appid}`,
-				})),
-				displayName: personaname,
-				avatar: avatarfull,
+		return formatJSONResponse(
+			{
+				steamProfile: {
+					games: games.map(({appid, img_icon_url, name}) => ({
+						appId: appid,
+						iconUrl: `http://media.steampowered.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`,
+						imageUrl: `https://steamcdn-a.akamaihd.net/steam/apps/${appid}/header.jpg`,
+						name,
+						url: `https://store.steampowered.com/app/${appid}`,
+					})),
+					displayName: personaname,
+					avatar: avatarfull,
+				},
 			},
-			event,
-		})
+			{
+				headers: {
+					'Cache-control': 'public;max-age=604800',
+				},
+			}
+		)
 	} catch (e) {
-		return formatJSONResponse({message: e.message}, e === INVALID_PROFILE_URL_ERR ? 400 : 500)
+		return formatJSONResponse(
+			{message: e.message},
+			{
+				statusCode: e === INVALID_PROFILE_URL_ERR ? 400 : 500,
+				// TODO - Is this even an issue?
+				// So that changes in steam lib visibility are reflected
+				headers: {
+					'Cache-Control': 'no-store',
+				},
+			}
+		)
 	}
 }
 

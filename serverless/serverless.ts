@@ -1,6 +1,7 @@
 import type {AWS} from '@serverless/typescript'
 
 import getSteamProfile from '@functions/getSteamProfile'
+import getGameStoreInfo from '@functions/getGameStoreInfo'
 
 import config from './config'
 
@@ -27,7 +28,7 @@ const serverlessConfiguration: AWS = {
 		lambdaHashingVersion: '20201221',
 	},
 	// import the function via paths
-	functions: {getSteamProfile},
+	functions: {getSteamProfile, getGameStoreInfo},
 }
 
 module.exports = serverlessConfiguration

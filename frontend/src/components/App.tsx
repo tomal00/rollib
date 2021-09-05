@@ -5,7 +5,7 @@ import {QueryClient, QueryClientProvider} from 'react-query'
 import classnames from 'classnames'
 import Button from '@Components/common/button'
 import TextInput from '@Components/common/text-input'
-import {SteamGame, SteamProfile} from '@Types/steam'
+import {SteamGame, SteamProfile, StoreInfo} from '@Types/steam'
 import randomSubarray from '@Utils/randomSubarray'
 import defaultAvatar from '@Assets/default-avatar.png'
 
@@ -29,9 +29,32 @@ const fetchSteamProfile = (profileUrl: string): Promise<SteamProfile> =>
 			return data.steamProfile
 		})
 
+const fetchGameStoreInfo = (appId: number): Promise<StoreInfo> =>
+	fetch(`http://localhost:3000/dev/store-info?appId=${appId}`, {cache: 'force-cache'}).then(
+		(res) => res.json()
+	)
+
+const GameView = ({game}: {game: SteamGame}) => {
+	const {data: StoreInfo} = useQuery(
+		`store-info-${game.appId}`,
+		() => fetchGameStoreInfo(game.appId),
+		{
+			staleTime: Infinity,
+			cacheTime: Infinity,
+			retry: false,
+			onError: (e) => {
+				alert(e)
+			},
+		}
+	)
+
+	return <div>tady je sekce jak vino</div>
+}
+
 const App = () => {
 	const [profileUrl, setProfileUrl] = useState('')
 	const [gameView, setGameView] = useState<null | SteamGame>(null)
+	const [gameViewActive, setGameViewActive] = useState(false)
 	const {data: steamProfile, isLoading} = useQuery(
 		profileUrl,
 		() => fetchSteamProfile(profileUrl),
@@ -54,7 +77,7 @@ const App = () => {
 			<div
 				class={classnames(
 					'h-96 translate flex flex-col items-center justify-center min-h-screen transform transition-transform',
-					gameView && '-translate-x-full'
+					gameViewActive && '-translate-x-full'
 				)}
 				style={{
 					transitionDuration: 500,
@@ -81,22 +104,13 @@ const App = () => {
 					</div>
 					<ProfileUrlSubmit onSubmit={setProfileUrl} />
 				</div>
-				{<Games games={games} onRollEnd={setGameView} />}
-			</div>
-		)
-	}
-
-	// TODO make this a component
-	const renderGameView = () => {
-		return (
-			<div
-				onClick={() => setGameView(null)}
-				class={classnames(
-					'absolute top-0 w-full transform transition-transform',
-					!gameView && 'translate-x-full'
-				)}
-				style={{transitionDuration: 500}}>
-				TADY JE sekce jak vino
+				{
+					<Games
+						games={games}
+						setGameView={setGameView}
+						onRollEnd={() => setGameViewActive(true)}
+					/>
+				}
 			</div>
 		)
 	}
@@ -104,7 +118,15 @@ const App = () => {
 	return (
 		<div class="relative h-full min-h-screen bg-gray-700 overflow-hidden">
 			{renderSpinner()}
-			{renderGameView()}
+			<div
+				onClick={() => setGameViewActive(false)}
+				class={classnames(
+					'absolute top-0 w-full transform transition-transform',
+					!gameViewActive && 'translate-x-full'
+				)}
+				style={{transitionDuration: 500}}>
+				{gameView && <GameView game={gameView} />}
+			</div>
 		</div>
 	)
 }
@@ -119,16 +141,25 @@ const mapKeys = (games: SteamGame[]): SteamGame[] => {
 	return games
 }
 
-const Games = ({games, onRollEnd}: {games: SteamGame[]; onRollEnd: (game: SteamGame) => void}) => {
+const Games = ({
+	games,
+	onRollEnd,
+	setGameView,
+}: {
+	games: SteamGame[]
+	setGameView: (game: SteamGame) => void
+	onRollEnd: () => void
+}) => {
 	const [visibleGames, setVisibleGames] = useState<SteamGame[]>([])
 	const [isRolling, setIsRolling] = useState(false)
 
 	const handleRoll = () => {
 		setIsRolling(true)
+		setGameView(visibleGames[62])
 		setTimeout(() => {
 			setVisibleGames([...visibleGames.slice(-5), ...mapKeys(randomSubarray(games, 60))])
 			setIsRolling(false)
-			onRollEnd(visibleGames[62])
+			onRollEnd()
 		}, 5100)
 	}
 

@@ -8,6 +8,18 @@ export type SteamGame = {
 	key?: string
 }
 
+type StoreAsset = {
+	id: number
+	url: string
+	thumbnail: string
+}
+
+export type StoreInfo = {
+	description: string
+	images: StoreAsset[]
+	videos: StoreAsset[]
+}
+
 export type SteamProfile = {
 	displayName: string
 	avatar: string
