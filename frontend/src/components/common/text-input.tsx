@@ -20,7 +20,7 @@ const TextInput = ({label, inputClass, ...props}: Props) => {
 			<input
 				{...props}
 				class={classnames(
-					'border-b-2 color-transition border-current focus:border-purple-500 focus:text-gray-200 bg-transparent placeholder-gray-400',
+					'border-b-2 transition-colors border-current focus:border-purple-500 focus:text-gray-200 bg-transparent placeholder-gray-400',
 					!!label && 'mt-1',
 					inputClass
 				)}
@@ -28,7 +28,7 @@ const TextInput = ({label, inputClass, ...props}: Props) => {
 				id={id}
 			/>
 			{label && (
-				<label for={id} class="text-current text-xs color-transition">
+				<label for={id} class="text-current text-xs transition-colors">
 					{label}
 				</label>
 			)}

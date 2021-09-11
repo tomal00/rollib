@@ -37,16 +37,18 @@ const getGameStoreInfo: ValidatedEventAPIGatewayProxyEvent<null> = async (event)
 		return formatJSONResponse(
 			{
 				description,
-				images: screenshots.map(({id, path_full, path_thumbnail}) => ({
-					id,
-					url: path_full,
-					thumbnail: path_thumbnail,
-				})),
-				videos: movies.map(({id, thumbnail, webm}) => ({
-					id,
-					thumbnail,
-					url: webm['480'],
-				})),
+				images:
+					screenshots?.map(({id, path_full, path_thumbnail}) => ({
+						id,
+						url: path_full,
+						thumbnail: path_thumbnail,
+					})) || [],
+				videos:
+					movies?.map(({id, thumbnail, webm}) => ({
+						id,
+						thumbnail,
+						url: webm['480'],
+					})) || [],
 			},
 			{
 				headers: {

@@ -1,11 +1,11 @@
 export type SteamGame = {
 	appId: number
 	iconUrl: string
-	logoUrl: string
 	imageUrl: string
 	name: string
 	url: string
 	key?: string
+	playTime: number
 }
 
 type StoreAsset = {

@@ -62,12 +62,13 @@ const getSteamProfile: ValidatedEventAPIGatewayProxyEvent<null> = async (event) 
 		return formatJSONResponse(
 			{
 				steamProfile: {
-					games: games.map(({appid, img_icon_url, name}) => ({
+					games: games.map(({appid, img_icon_url, name, playtime_forever}) => ({
 						appId: appid,
 						iconUrl: `http://media.steampowered.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`,
 						imageUrl: `https://steamcdn-a.akamaihd.net/steam/apps/${appid}/header.jpg`,
 						name,
 						url: `https://store.steampowered.com/app/${appid}`,
+						playTime: playtime_forever,
 					})),
 					displayName: personaname,
 					avatar: avatarfull,

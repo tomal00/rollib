@@ -16,10 +16,12 @@
 		@apply focus:outline-none box-content;
 	}
 
-	.color-transition {
-		@apply transition-colors duration-150;
+	img {
+		-webkit-user-drag: none;
 	}
-	
+}
+
+@layer utilities {
 	.scrollbar::-webkit-scrollbar-track {
 		@apply bg-purple-400;
 	}
