@@ -2,6 +2,7 @@ import {useState} from 'preact/hooks'
 import randomId from 'random-id'
 import classnames from 'classnames'
 
+// TODO - this module seems to be redundant
 const CheckBox = ({label, ...props}: {label?: string; [key: string]: any}) => {
 	const [id] = useState<string | undefined>(label ? () => randomId(10) : undefined)
 

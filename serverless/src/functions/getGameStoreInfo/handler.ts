@@ -1,6 +1,7 @@
 import 'source-map-support/register'
 
 import fetch from 'node-fetch'
+import * as sanitizeHtml from 'sanitize-html'
 
 import type {ValidatedEventAPIGatewayProxyEvent} from '@libs/apiGateway'
 import {formatJSONResponse} from '@libs/apiGateway'
@@ -34,21 +35,25 @@ const getGameStoreInfo: ValidatedEventAPIGatewayProxyEvent<null> = async (event)
 
 		const {short_description: description, screenshots, movies} = gameInfo.data
 
+		const images =
+			screenshots?.map(({id, path_full, path_thumbnail}) => ({
+				id,
+				url: path_full,
+				thumbnail: path_thumbnail,
+				type: 'image',
+			})) || []
+		const videos =
+			movies?.map(({id, thumbnail, webm}) => ({
+				id,
+				thumbnail,
+				url: webm['480'],
+				type: 'video',
+			})) || []
+
 		return formatJSONResponse(
 			{
-				description,
-				images:
-					screenshots?.map(({id, path_full, path_thumbnail}) => ({
-						id,
-						url: path_full,
-						thumbnail: path_thumbnail,
-					})) || [],
-				videos:
-					movies?.map(({id, thumbnail, webm}) => ({
-						id,
-						thumbnail,
-						url: webm['480'],
-					})) || [],
+				description: sanitizeHtml(description, {allowedTags: [], allowedAttributes: {}}),
+				assets: videos.concat(images),
 			},
 			{
 				headers: {

@@ -17,6 +17,12 @@ module.exports = {
 			animation: {
 				roll: 'roll 5s',
 			},
+			height: {
+				144: '36rem',
+			},
+			textColor: {
+				inherit: 'inherit',
+			},
 		},
 	},
 	variants: {

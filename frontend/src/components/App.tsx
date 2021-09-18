@@ -1,7 +1,8 @@
 import {useQuery} from 'react-query'
-import {useLayoutEffect, useState, useRef, useEffect} from 'preact/hooks'
-import {FunctionalComponent} from 'preact'
+import {useLayoutEffect, useState, useRef, useEffect, useMemo, useCallback} from 'preact/hooks'
+import {FunctionalComponent, ComponentChildren} from 'preact'
 import {QueryClient, QueryClientProvider} from 'react-query'
+import debounce from 'lodash/debounce'
 import classnames from 'classnames'
 import Button from '@Components/common/button'
 import TextInput from '@Components/common/text-input'
@@ -22,7 +23,6 @@ const queryClient = new QueryClient({
 	},
 })
 
-// TODO - preload all game logos
 const fetchSteamProfile = (profileUrl: string): Promise<SteamProfile> =>
 	fetch(`http://127.0.0.1:3000/dev/steam-profile?profileUrl=${profileUrl}`)
 		.then((res) => res.json().then((data) => ({status: res.status, data})))
@@ -41,43 +41,35 @@ const fetchGameStoreInfo = (appId: number): Promise<StoreInfo> =>
 			return data
 		})
 
-const GameView = ({game, autoPlay}: {game: SteamGame; autoPlay: boolean}) => {
+const GameView = ({game, isVisible}: {game: SteamGame; isVisible: boolean}) => {
 	const [activePreview, setActivePreview] = useState<StoreAsset | null>(null)
 	const activeVideoRef = useRef<HTMLVideoElement>()
-	const {data: storeInfo, isError} = useQuery(
+	const {data: {assets = [], description = ''} = {}, isError} = useQuery(
 		`store-info-${game.appId}`,
 		() => fetchGameStoreInfo(game.appId),
 		{
 			staleTime: Infinity,
 			cacheTime: Infinity,
 			retry: false,
-			onSuccess: ({images, videos}) => {
-				setActivePreview(videos[0] || images[0])
+			onSuccess: ({assets = [null]}) => {
+				setActivePreview(assets[0])
 			},
 		}
 	)
-	const lastShowcaseItemIndex =
-		(storeInfo?.videos.length || 0) + (storeInfo?.images.length || 0) - 1
-	const hasImages = !!storeInfo?.images.length
-	const isPreviewVideo = storeInfo?.videos.includes(activePreview as StoreAsset)
 	const previewProps = {style: {height: 331, width: 589}, height: 331, width: 589} // damn you tailwind
-
 	useEffect(() => {
-		if (autoPlay) {
+		if (isVisible) {
 			setTimeout(() => activeVideoRef.current?.play(), 750)
 		} else {
 			activeVideoRef.current?.pause()
 		}
-	}, [autoPlay])
+	}, [isVisible])
 
 	useLayoutEffect(() => {
-		if (isPreviewVideo && autoPlay) {
+		if (activePreview?.type === 'video' && isVisible) {
 			activeVideoRef.current.play()
 		}
-		// DO NOT INCLUDE autoPlay in deps
-		// This hook should handle ONLY switching between videos = we don't care if autoPlay changes.
-		// We only care whether or not it's enabled when activePreview changes
-	}, [activePreview, isPreviewVideo])
+	}, [activePreview])
 
 	if (isError) {
 		return (
@@ -95,7 +87,7 @@ const GameView = ({game, autoPlay}: {game: SteamGame; autoPlay: boolean}) => {
 	return (
 		<div class="grid gap-6 grid-cols-6 max-w-4xl auto-rows-auto">
 			<div class="col-span-6 text-3xl">{game.name}</div>
-			{isPreviewVideo ? (
+			{activePreview?.type === 'video' ? (
 				<video
 					ref={activeVideoRef}
 					key={activePreview?.id}
@@ -110,10 +102,11 @@ const GameView = ({game, autoPlay}: {game: SteamGame; autoPlay: boolean}) => {
 				<img {...previewProps} class="col-span-4 row-span-4" src={activePreview?.url} />
 			)}
 			<div class="flex flex-col col-span-2 row-span-4">
-				<img class="mb-6" src={game.imageUrl} />
+				<img class="mb-3" src={game.imageUrl} />
 				<p
-					class="line-clamp-5 mb-6 text-sm"
-					dangerouslySetInnerHTML={{__html: storeInfo?.description || ''}}
+					class="line-clamp-6 mb-3 text-sm"
+					// Special characters :/ - sanitized by BE just in case
+					dangerouslySetInnerHTML={{__html: description}}
 				/>
 				<p class="mb-1 mt-auto">
 					<b>
@@ -133,44 +126,114 @@ const GameView = ({game, autoPlay}: {game: SteamGame; autoPlay: boolean}) => {
 					</a>
 				</p>
 			</div>
-			<div class="scrollbar col-span-6 pb-2 whitespace-nowrap select-none overflow-x-auto">
-				{storeInfo?.videos.map((video, i) => (
-					<div
-						key={video.id}
-						onClick={() => setActivePreview(video)}
-						class={classnames(
-							'relative inline-block cursor-pointer transition-opacity',
-							(i > 0 || hasImages) && i < lastShowcaseItemIndex && 'mr-2',
-							video !== activePreview && 'opacity-30 hover:opacity-70'
-						)}>
-						<img class="inline h-16" src={video.thumbnail} />
+			<div class="scrollbar col-span-6 pb-2 whitespace-nowrap select-none overflow-x-auto space-x-2">
+				{assets.map((asset) =>
+					asset.type === 'video' ? (
+						<div
+							key={asset.id}
+							onClick={() => setActivePreview(asset)}
+							class={classnames(
+								'relative inline-block cursor-pointer transition-opacity',
+								asset !== activePreview && 'opacity-30 hover:opacity-70'
+							)}>
+							<img class="inline h-16" src={asset.thumbnail} />
+							<img
+								class="absolute left-1/2 top-1/2 h-6 transform -translate-x-1/2 -translate-y-1/2"
+								src={playIcon}
+							/>
+						</div>
+					) : (
 						<img
-							class="absolute left-1/2 top-1/2 h-6 transform -translate-x-1/2 -translate-y-1/2"
-							src={playIcon}
+							key={asset.id}
+							onClick={() => setActivePreview(asset)}
+							src={asset.thumbnail}
+							class={classnames(
+								'inline h-16 cursor-pointer transition-opacity',
+								asset !== activePreview && 'opacity-30 hover:opacity-70'
+							)}
 						/>
-					</div>
-				))}
-				{storeInfo?.images.map((image, i) => (
-					<img
-						key={image.id}
-						onClick={() => setActivePreview(image)}
-						src={image.thumbnail}
-						class={classnames(
-							'inline h-16 cursor-pointer transition-opacity',
-							i < lastShowcaseItemIndex && 'mr-2',
-							image !== activePreview && 'opacity-30 hover:opacity-70'
-						)}
-					/>
-				))}
+					)
+				)}
 			</div>
 		</div>
 	)
 }
 
+enum PlaytimeFilter {
+	ALL = 'ALL',
+	UNPLAYED_ONLY = 'UNPLAYED_ONLY',
+}
+
+type PlaytimeFilterT = PlaytimeFilter | number
+
+const Filter = ({
+	selectedFilter,
+	setSelectedFilter,
+}: {
+	selectedFilter: PlaytimeFilterT
+	setSelectedFilter: (filter: PlaytimeFilterT) => void
+}) => {
+	const [maxHours, setMaxHours] = useState(0)
+	const setSelectedFilterDebounced = useCallback(debounce(setSelectedFilter, 300), [
+		setSelectedFilter,
+	])
+	const renderOption = (value: PlaytimeFilterT, node: ComponentChildren | string) => {
+		const isSelected =
+			value === selectedFilter ||
+			(typeof value === 'number' && typeof selectedFilter === 'number')
+		return (
+			<div
+				onClick={() => setSelectedFilter(value)}
+				class={classnames(
+					'p-1 cursor-pointer border-b-2 border-transparent transition-colors',
+					isSelected
+						? ' border-purple-700 text-white'
+						: 'hover:border-purple-500 text-gray-400'
+				)}>
+				{node}
+			</div>
+		)
+	}
+
+	return (
+		<div class="flex items-end mt-auto select-none space-x-8">
+			{renderOption(PlaytimeFilter.ALL, 'All games')}
+			{renderOption(PlaytimeFilter.UNPLAYED_ONLY, 'Unplayed only')}
+			{renderOption(
+				maxHours,
+				<>
+					<label for="max-hours" class="text-inherit block text-xs">
+						Max hours
+					</label>
+					<input
+						id="max-hours"
+						class="w-20 text-current bg-transparent"
+						min={0}
+						max={9999}
+						type="number"
+						value={maxHours}
+						onChange={(e: JSX.TargetedEvent<HTMLInputElement, Event>) => {
+							const val = Math.abs(Number(e.currentTarget.value))
+							setMaxHours(val)
+							setSelectedFilterDebounced(val)
+						}}
+					/>
+				</>
+			)}
+		</div>
+	)
+}
+
+// TODO - Handle case when filters don't match any games / the account doesn't have any games
+// TODO - Handle private profile
+// TODO - Show some App description instead of spinner when no profile is chosen
+// TODO - Loading state when loading steam profile
+
 const App = () => {
 	const [profileUrl, setProfileUrl] = useState('')
 	const [gameView, setGameView] = useState<null | SteamGame>(null)
 	const [gameViewActive, setGameViewActive] = useState(false)
+	const [selectedFilter, setSelectedFilter] = useState<PlaytimeFilterT>(PlaytimeFilter.ALL)
 	const {data: steamProfile, isLoading} = useQuery(
 		profileUrl,
 		() => fetchSteamProfile(profileUrl),
@@ -185,12 +248,20 @@ const App = () => {
 			},
 		}
 	)
-	const games = steamProfile?.games || []
+	const games = useMemo(
+		() =>
+			(steamProfile?.games || []).filter(({playTime}) => {
+				if (selectedFilter === PlaytimeFilter.ALL) return true
+				if (selectedFilter === PlaytimeFilter.UNPLAYED_ONLY && !playTime) return true
+				if (typeof selectedFilter === 'number') return playTime <= selectedFilter * 60
+			}),
+		[steamProfile, selectedFilter]
+	)
 
 	// TODO make this a component
 	const renderSpinner = () => {
 		return (
-			<>
+			<div class="h-144 flex flex-col items-center">
 				<div class="grid gap-2 gap-x-4 grid-cols-3 grid-rows-3 p-6 w-max bg-purple-600 bg-opacity-5">
 					<img
 						class={classnames('row-span-2 h-32', !steamProfile && 'opacity-30')}
@@ -213,14 +284,17 @@ const App = () => {
 					</div>
 					<ProfileUrlSubmit onSubmit={setProfileUrl} />
 				</div>
-				{
+				{!!steamProfile?.games.length && (
+					<Filter selectedFilter={selectedFilter} setSelectedFilter={setSelectedFilter} />
+				)}
+				{!!steamProfile?.games.length && (
 					<Games
 						games={games}
 						setGameView={setGameView}
 						onRollEnd={() => setGameViewActive(true)}
 					/>
-				}
-			</>
+				)}
+			</div>
 		)
 	}
 
@@ -228,21 +302,17 @@ const App = () => {
 		<div class="relative h-full min-h-screen bg-gray-700 overflow-hidden">
 			<div
 				class={classnames(
-					'h-96 translate flex flex-col items-center justify-center min-h-screen transform transition-transform',
+					'h-96 translate flex items-center justify-center min-h-screen transform transition-transform duration-500',
 					gameViewActive && '-translate-x-full'
-				)}
-				style={{
-					transitionDuration: 500,
-				}}>
+				)}>
 				{renderSpinner()}
 			</div>
 			<div
 				class={classnames(
-					'absolute top-0 w-full flex flex-col items-center justify-center h-full transform transition-transform',
+					'absolute top-0 w-full flex flex-col items-center justify-center h-full transform transition-transform duration-500',
 					!gameViewActive && 'translate-x-full'
-				)}
-				style={{transitionDuration: 500}}>
-				{gameView && <GameView game={gameView} autoPlay={gameViewActive} />}
+				)}>
+				{gameView && <GameView game={gameView} isVisible={gameViewActive} />}
 				<Button
 					onClick={() => setGameViewActive(false)}
 					class="absolute left-6 top-6 text-gray-300 hover:text-purple-500 underline text-3xl"
@@ -287,18 +357,22 @@ const Games = ({
 	}
 
 	useLayoutEffect(() => {
-		if (games.length) {
-			setVisibleGames(mapKeys(randomSubarray(games, 65)))
+		if (games) {
+			setVisibleGames((visibleGames) => {
+				if (visibleGames.length) {
+					return visibleGames.slice(0, 5).concat(mapKeys(randomSubarray(games, 60)))
+				}
+				return mapKeys(randomSubarray(games, 65))
+			})
 		}
-	}, [!!games.length])
+	}, [games])
 
-	// TODO - some filters e.g. never played only
 	return (
 		<>
 			<div
 				style={{width: 4 * 240, minHeight: 112}}
 				class={classnames(
-					'relative mt-24 overflow-hidden transition-opacity',
+					'relative mt-6 overflow-hidden transition-opacity',
 					visibleGames.length ? 'opacity-100' : 'opacity-0'
 				)}>
 				<div

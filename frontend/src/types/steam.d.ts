@@ -12,12 +12,12 @@ type StoreAsset = {
 	id: number
 	url: string
 	thumbnail: string
+	type: 'video' | 'image'
 }
 
 export type StoreInfo = {
 	description: string
-	images: StoreAsset[]
-	videos: StoreAsset[]
+	assets: StoreAsset[]
 }
 
 export type SteamProfile = {
