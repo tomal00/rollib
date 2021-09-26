@@ -19,6 +19,16 @@ module.exports = {
 			},
 			height: {
 				144: '36rem',
+				'game-preview': '112px',
+			},
+			minHeight: {
+				'game-preview': '112px',
+			},
+			width: {
+				'game-preview': '240px',
+			},
+			minWidth: {
+				'game-preview': '240px',
 			},
 			textColor: {
 				inherit: 'inherit',

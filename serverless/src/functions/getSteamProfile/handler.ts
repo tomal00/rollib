@@ -6,6 +6,10 @@ import type {ValidatedEventAPIGatewayProxyEvent} from '@libs/apiGateway'
 import {formatJSONResponse} from '@libs/apiGateway'
 
 const INVALID_PROFILE_URL_ERR = new Error('Invalid profile URL')
+const UNAVAILABLE_LIBRARY = new Error(
+	"Could not get the profile's library either because the profile is " +
+		'private or because the profile has private game details.'
+)
 
 const getSteamProfile: ValidatedEventAPIGatewayProxyEvent<null> = async (event) => {
 	const {profileUrl: profileUrlEncoded} = event.queryStringParameters || {}
@@ -59,6 +63,10 @@ const getSteamProfile: ValidatedEventAPIGatewayProxyEvent<null> = async (event) 
 			}),
 		])
 
+		if (!games) {
+			throw UNAVAILABLE_LIBRARY
+		}
+
 		return formatJSONResponse(
 			{
 				steamProfile: {
@@ -84,7 +92,7 @@ const getSteamProfile: ValidatedEventAPIGatewayProxyEvent<null> = async (event) 
 		return formatJSONResponse(
 			{message: e.message},
 			{
-				statusCode: e === INVALID_PROFILE_URL_ERR ? 400 : 500,
+				statusCode: e === INVALID_PROFILE_URL_ERR || e === UNAVAILABLE_LIBRARY ? 400 : 500,
 				// TODO - Is this even an issue?
 				// So that changes in steam lib visibility are reflected
 				headers: {

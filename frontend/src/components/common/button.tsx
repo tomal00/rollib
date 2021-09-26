@@ -4,7 +4,7 @@ const Button = ({colorClassNames, ...rest}: {[key: string]: any; colorClassNames
 	<button
 		{...rest}
 		class={classnames(
-			'p-2 transition-colors disabled:cursor-not-allowe',
+			'p-2 transition-colors disabled:cursor-not-allowed',
 			colorClassNames || 'disabled:bg-gray-400 bg-purple-500 hover:bg-purple-700',
 			rest.class
 		)}

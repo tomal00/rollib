@@ -29,6 +29,10 @@ const fetchSteamProfile = (profileUrl: string): Promise<SteamProfile> =>
 		.then(({status, data}) => {
 			if (status >= 400) throw new Error(data.message)
 
+			if (!data.steamProfile.games.length) {
+				throw new Error("There are no games in this steam profile's library.")
+			}
+
 			return data.steamProfile
 		})
 
@@ -196,7 +200,8 @@ const Filter = ({
 	}
 
 	return (
-		<div class="flex items-end mt-auto select-none space-x-8">
+		<div class="flex items-end select-none space-x-8">
+			{/* TODO - decringify this later */}
 			{renderOption(PlaytimeFilter.ALL, 'All games')}
 			{renderOption(PlaytimeFilter.UNPLAYED_ONLY, 'Unplayed only')}
 			{renderOption(
@@ -224,16 +229,14 @@ const Filter = ({
 	)
 }
 
-// TODO - Handle case when filters don't match any games / the account doesn't have any games
-// TODO - Handle private profile
-// TODO - Show some App description instead of spinner when no profile is chosen
-// TODO - Loading state when loading steam profile
+// TODO - Add some info when no profile is loaded like https://thewheelhaus.com/
+// TODO - Might be nice to show link to https://help.steampowered.com/en/faqs/view/588C-C67D-0251-C276
+// when private profile is detected
 
 const App = () => {
 	const [profileUrl, setProfileUrl] = useState('')
 	const [gameView, setGameView] = useState<null | SteamGame>(null)
 	const [gameViewActive, setGameViewActive] = useState(false)
-	const [selectedFilter, setSelectedFilter] = useState<PlaytimeFilterT>(PlaytimeFilter.ALL)
 	const {data: steamProfile, isLoading} = useQuery(
 		profileUrl,
 		() => fetchSteamProfile(profileUrl),
@@ -248,15 +251,6 @@ const App = () => {
 			},
 		}
 	)
-	const games = useMemo(
-		() =>
-			(steamProfile?.games || []).filter(({playTime}) => {
-				if (selectedFilter === PlaytimeFilter.ALL) return true
-				if (selectedFilter === PlaytimeFilter.UNPLAYED_ONLY && !playTime) return true
-				if (typeof selectedFilter === 'number') return playTime <= selectedFilter * 60
-			}),
-		[steamProfile, selectedFilter]
-	)
 
 	// TODO make this a component
 	const renderSpinner = () => {
@@ -264,36 +258,40 @@ const App = () => {
 			<div class="h-144 flex flex-col items-center">
 				<div class="grid gap-2 gap-x-4 grid-cols-3 grid-rows-3 p-6 w-max bg-purple-600 bg-opacity-5">
 					<img
-						class={classnames('row-span-2 h-32', !steamProfile && 'opacity-30')}
+						class={classnames(
+							'row-span-2 h-32',
+							!steamProfile && 'opacity-30',
+							isLoading && 'animate-pulse'
+						)}
 						src={steamProfile?.avatar || defaultAvatar}
 					/>
 					<div
 						style={{maxWidth: 256}}
 						class={classnames(
 							'col-span-2 text-2xl truncate',
-							!steamProfile && 'opacity-30'
+							!steamProfile && 'opacity-30',
+							isLoading && 'animate-pulse'
 						)}>
 						{steamProfile?.displayName || 'Load steam library'}
 					</div>
 					<div
 						style={{maxWidth: 256}}
-						class={classnames('col-span-2 text-base', !steamProfile && 'opacity-30')}>
+						class={classnames(
+							'col-span-2 text-base',
+							!steamProfile && 'opacity-30',
+							isLoading && 'animate-pulse'
+						)}>
 						{steamProfile?.games.length
 							? `${steamProfile.games.length} games owned`
-							: 'Load a steam profile'}
+							: 'Load a steam profile to proceed'}
 					</div>
-					<ProfileUrlSubmit onSubmit={setProfileUrl} />
+					<ProfileUrlSubmit onSubmit={setProfileUrl} isLoading={isLoading} />
 				</div>
-				{!!steamProfile?.games.length && (
-					<Filter selectedFilter={selectedFilter} setSelectedFilter={setSelectedFilter} />
-				)}
-				{!!steamProfile?.games.length && (
-					<Games
-						games={games}
-						setGameView={setGameView}
-						onRollEnd={() => setGameViewActive(true)}
-					/>
-				)}
+				<Games
+					games={steamProfile?.games || []}
+					setGameView={setGameView}
+					onRollEnd={() => setGameViewActive(true)}
+				/>
 			</div>
 		)
 	}
@@ -344,6 +342,7 @@ const Games = ({
 	onRollEnd: () => void
 }) => {
 	const [visibleGames, setVisibleGames] = useState<SteamGame[]>([])
+	const [selectedFilter, setSelectedFilter] = useState<PlaytimeFilterT>(PlaytimeFilter.ALL)
 	const [isRolling, setIsRolling] = useState(false)
 
 	const handleRoll = () => {
@@ -359,63 +358,78 @@ const Games = ({
 	useLayoutEffect(() => {
 		if (games) {
 			setVisibleGames((visibleGames) => {
-				if (visibleGames.length) {
-					return visibleGames.slice(0, 5).concat(mapKeys(randomSubarray(games, 60)))
+				const filteredGames = games.filter(({playTime}) => {
+					if (selectedFilter === PlaytimeFilter.ALL) return true
+					if (selectedFilter === PlaytimeFilter.UNPLAYED_ONLY && !playTime) return true
+					if (typeof selectedFilter === 'number') return playTime <= selectedFilter * 60
+				})
+				if (!filteredGames.length) {
+					return []
 				}
-				return mapKeys(randomSubarray(games, 65))
+				if (visibleGames.length) {
+					return visibleGames
+						.slice(0, 5)
+						.concat(mapKeys(randomSubarray(filteredGames, 60)))
+				}
+				return mapKeys(randomSubarray(filteredGames, 65))
 			})
 		}
-	}, [games])
+	}, [games, selectedFilter])
 
 	return (
-		<>
-			<div
-				style={{width: 4 * 240, minHeight: 112}}
-				class={classnames(
-					'relative mt-6 overflow-hidden transition-opacity',
-					visibleGames.length ? 'opacity-100' : 'opacity-0'
-				)}>
-				<div
-					class={classnames('flex', isRolling && 'games-rolling-animation')}
-					style={{
-						transform: 'translateX(calc(-0.5 * 240px)',
-					}}>
-					{visibleGames.map((game) => (
-						<img
-							key={game.key}
-							class="object-cover"
-							src={game.imageUrl}
-							alt={game.name}
-							style={{
-								width: 240,
-								minWidth: 240,
-								height: 112,
-							}}
-						/>
-					))}
-				</div>
-				<div
-					class="absolute top-0 h-full border-2 border-purple-700"
-					style={{left: '50%', transform: 'translateX(-50%)', width: 240}}></div>
-				<div class="absolute top-0 w-full h-full bg-gradient-to-r from-gray-700 to-gray-700 via-transparent" />
-			</div>
+		<div
+			class={classnames(
+				'flex flex-col items-center mt-auto transition-opacity',
+				games.length ? 'opacity-100' : 'opacity-0'
+			)}>
 			<div
 				class={classnames(
 					'transition-opacity',
-					visibleGames.length ? 'opacity-100' : 'opacity-0'
+					isRolling ? 'opacity-50 pointer-events-none' : 'opacity-100'
 				)}>
-				<Button
-					onClick={handleRoll}
-					disabled={isRolling || !visibleGames.length}
-					class="mt-4 w-24">
-					Roll
-				</Button>
+				<Filter selectedFilter={selectedFilter} setSelectedFilter={setSelectedFilter} />
 			</div>
-		</>
+			{visibleGames.length ? (
+				<div
+					style={{width: 4 * 240}}
+					class="min-h-game-preview relative mt-6 overflow-hidden">
+					<div
+						class={classnames('flex', isRolling && 'games-rolling-animation')}
+						style={{
+							transform: 'translateX(calc(-0.5 * 240px)',
+						}}>
+						{visibleGames.map((game) => (
+							<img
+								key={game.key}
+								class="h-game-preview w-game-preview min-w-game-preview object-cover"
+								src={game.imageUrl}
+								alt={game.name}
+							/>
+						))}
+					</div>
+					<div class="w-game-preview absolute left-1/2 top-0 h-full border-2 border-purple-700 transform -translate-x-1/2" />
+					<div class="absolute top-0 w-full h-full bg-gradient-to-r from-gray-700 to-gray-700 via-transparent" />
+				</div>
+			) : (
+				<div class="h-game-preview mt-6">None of your games match the selected filter</div>
+			)}
+			<Button
+				onClick={handleRoll}
+				disabled={isRolling || !visibleGames.length}
+				class="mt-4 w-24">
+				Roll
+			</Button>
+		</div>
 	)
 }
 
-const ProfileUrlSubmit = ({onSubmit}: {onSubmit: (profuleUrl: string) => void}) => {
+const ProfileUrlSubmit = ({
+	onSubmit,
+	isLoading,
+}: {
+	isLoading: boolean
+	onSubmit: (profileUrl: string) => void
+}) => {
 	const [value, setValue] = useState<string>('')
 
 	return (
@@ -433,7 +447,7 @@ const ProfileUrlSubmit = ({onSubmit}: {onSubmit: (profuleUrl: string) => void}) 
 			/>
 			<Button
 				// Maybe add some proper validation
-				disabled={!value}
+				disabled={!value || isLoading}
 				onClick={() => onSubmit(value)}
 				class="self-center place-self-center mt-4 w-24">
 				Load
