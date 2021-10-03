@@ -1,17 +1,31 @@
-import {useQuery} from 'react-query'
-import {useLayoutEffect, useState, useRef, useEffect, useMemo, useCallback} from 'preact/hooks'
+import {useLayoutEffect, useState, useRef, useEffect, useCallback} from 'preact/hooks'
 import {FunctionalComponent, ComponentChildren} from 'preact'
-import {QueryClient, QueryClientProvider} from 'react-query'
+import {useQuery, QueryClient, QueryClientProvider} from 'react-query'
 import debounce from 'lodash/debounce'
 import classnames from 'classnames'
 import Button from '@Components/common/button'
+import AnchorButton from '@Components/common/anchor-button'
 import TextInput from '@Components/common/text-input'
 import {SteamGame, SteamProfile, StoreAsset, StoreInfo} from '@Types/steam'
-import randomSubarray from '@Utils/randomSubarray'
-import minsToPlaytime from '@Utils/minsToPlaytime'
+import randomSubarray from '@Utils/random-subarray'
+import minsToPlaytime from '@Utils/mins-to-playtime'
 import defaultAvatar from '@Assets/default-avatar.png'
 import steamLogo from '@Assets/steam-logo.svg'
 import playIcon from '@Assets/play.svg'
+import rollSfx from '@Assets/roll.mp3'
+import gameRevealSfx from '@Assets/game-reveal.mp3'
+import rollBreakpoints from '@Assets/roll-breakpoints.json'
+
+const rollAudioBreakpoints = rollBreakpoints.map((timeout) => ({
+	timeout,
+	sound: new Audio(rollSfx),
+}))
+const playRollSound = () => {
+	rollAudioBreakpoints.forEach(({timeout, sound}) => {
+		setTimeout(() => sound.play(), timeout)
+	})
+}
+const gameRevealSound = new Audio(gameRevealSfx)
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -78,41 +92,48 @@ const GameView = ({game, isVisible}: {game: SteamGame; isVisible: boolean}) => {
 	if (isError) {
 		return (
 			<div>
-				<div class="text-3xl">{game.name}</div>
-				<img class="mb-6 mt-6 w-auto h-auto" src={game.imageUrl} />
-				<div class="w-96">
+				<div class='text-3xl'>{game.name}</div>
+				<img class='mb-6 mt-6 w-auto h-auto' src={game.imageUrl} />
+				<div class='w-96'>
 					Unfortunately this product seems not to be available in the steam store at this
 					moment and so it's not possible to display any further info
+				</div>
+				<div class='text-center'>
+					<AnchorButton
+						class={classnames('mt-6', isVisible && 'animate-expand')}
+						href={`steam://run/${game.appId}`}>
+						<b>Play now</b>
+					</AnchorButton>
 				</div>
 			</div>
 		)
 	}
 
 	return (
-		<div class="grid gap-6 grid-cols-6 max-w-4xl auto-rows-auto">
-			<div class="col-span-6 text-3xl">{game.name}</div>
+		<div class='grid gap-6 grid-cols-6 max-w-4xl auto-rows-auto'>
+			<div class='col-span-6 text-3xl'>{game.name}</div>
 			{activePreview?.type === 'video' ? (
 				<video
 					ref={activeVideoRef}
 					key={activePreview?.id}
-					class="col-span-4 row-span-4"
+					class='col-span-4 row-span-4'
 					controls
 					playsInline
 					muted
 					{...previewProps}>
-					<source src={activePreview?.url} type="video/webm" />
+					<source src={activePreview?.url} type='video/webm' />
 				</video>
 			) : (
-				<img {...previewProps} class="col-span-4 row-span-4" src={activePreview?.url} />
+				<img {...previewProps} class='col-span-4 row-span-4' src={activePreview?.url} />
 			)}
-			<div class="flex flex-col col-span-2 row-span-4">
-				<img class="mb-3" src={game.imageUrl} />
+			<div class='flex flex-col col-span-2 row-span-4'>
+				<img class='mb-3' src={game.imageUrl} />
 				<p
-					class="line-clamp-6 mb-3 text-sm"
+					class='line-clamp-6 mb-3 text-sm'
 					// Special characters :/ - sanitized by BE just in case
 					dangerouslySetInnerHTML={{__html: description}}
 				/>
-				<p class="mb-1 mt-auto">
+				<p class='mb-1 mt-auto'>
 					<b>
 						{game.playTime
 							? `${minsToPlaytime(game.playTime)} on record`
@@ -121,16 +142,16 @@ const GameView = ({game, isVisible}: {game: SteamGame; isVisible: boolean}) => {
 				</p>
 				<p>
 					<a
-						rel="noreferrer noopener"
-						target="_blank"
+						rel='noreferrer noopener'
+						target='_blank'
 						href={`https://store.steampowered.com/app/${game.appId}`}
-						class="hover:text-purple-400 underline transition-colors">
-						<img class="inline mr-1 h-6" src={steamLogo} />
+						class='hover:text-purple-400 underline transition-colors'>
+						<img class='inline mr-1 h-6' src={steamLogo} />
 						Steam store link
 					</a>
 				</p>
 			</div>
-			<div class="scrollbar col-span-6 pb-2 whitespace-nowrap select-none overflow-x-auto space-x-2">
+			<div class='scrollbar col-span-6 pb-2 whitespace-nowrap select-none overflow-x-auto space-x-2'>
 				{assets.map((asset) =>
 					asset.type === 'video' ? (
 						<div
@@ -140,9 +161,9 @@ const GameView = ({game, isVisible}: {game: SteamGame; isVisible: boolean}) => {
 								'relative inline-block cursor-pointer transition-opacity',
 								asset !== activePreview && 'opacity-30 hover:opacity-70'
 							)}>
-							<img class="inline h-16" src={asset.thumbnail} />
+							<img class='inline h-16' src={asset.thumbnail} />
 							<img
-								class="absolute left-1/2 top-1/2 h-6 transform -translate-x-1/2 -translate-y-1/2"
+								class='absolute left-1/2 top-1/2 h-6 transform -translate-x-1/2 -translate-y-1/2'
 								src={playIcon}
 							/>
 						</div>
@@ -159,6 +180,11 @@ const GameView = ({game, isVisible}: {game: SteamGame; isVisible: boolean}) => {
 					)
 				)}
 			</div>
+			<AnchorButton
+				class={classnames('col-span-6 place-self-center', isVisible && 'animate-expand')}
+				href={`steam://run/${game.appId}`}>
+				<b>Play now</b>
+			</AnchorButton>
 		</div>
 	)
 }
@@ -200,22 +226,22 @@ const Filter = ({
 	}
 
 	return (
-		<div class="flex items-end select-none space-x-8">
+		<div class='flex items-end select-none space-x-8'>
 			{/* TODO - decringify this later */}
 			{renderOption(PlaytimeFilter.ALL, 'All games')}
 			{renderOption(PlaytimeFilter.UNPLAYED_ONLY, 'Unplayed only')}
 			{renderOption(
 				maxHours,
 				<>
-					<label for="max-hours" class="text-inherit block text-xs">
+					<label for='max-hours' class='text-inherit block text-xs'>
 						Max hours
 					</label>
 					<input
-						id="max-hours"
-						class="w-20 text-current bg-transparent"
+						id='max-hours'
+						class='w-20 text-current bg-transparent'
 						min={0}
 						max={9999}
-						type="number"
+						type='number'
 						value={maxHours}
 						onChange={(e: JSX.TargetedEvent<HTMLInputElement, Event>) => {
 							const val = Math.abs(Number(e.currentTarget.value))
@@ -232,6 +258,8 @@ const Filter = ({
 // TODO - Add some info when no profile is loaded like https://thewheelhaus.com/
 // TODO - Might be nice to show link to https://help.steampowered.com/en/faqs/view/588C-C67D-0251-C276
 // when private profile is detected
+// TODO - split into components
+// TODO - responsivity?
 
 const App = () => {
 	const [profileUrl, setProfileUrl] = useState('')
@@ -255,8 +283,8 @@ const App = () => {
 	// TODO make this a component
 	const renderSpinner = () => {
 		return (
-			<div class="h-144 flex flex-col items-center">
-				<div class="grid gap-2 gap-x-4 grid-cols-3 grid-rows-3 p-6 w-max bg-purple-600 bg-opacity-5">
+			<div class='h-144 flex flex-col items-center'>
+				<div class='grid gap-2 gap-x-4 grid-cols-3 grid-rows-3 p-6 w-max bg-purple-600 bg-opacity-5'>
 					<img
 						class={classnames(
 							'row-span-2 h-32',
@@ -297,7 +325,7 @@ const App = () => {
 	}
 
 	return (
-		<div class="relative h-full min-h-screen bg-gray-700 overflow-hidden">
+		<div class='relative h-full min-h-screen bg-gray-700 overflow-hidden'>
 			<div
 				class={classnames(
 					'h-96 translate flex items-center justify-center min-h-screen transform transition-transform duration-500',
@@ -313,8 +341,8 @@ const App = () => {
 				{gameView && <GameView game={gameView} isVisible={gameViewActive} />}
 				<Button
 					onClick={() => setGameViewActive(false)}
-					class="absolute left-6 top-6 text-gray-300 hover:text-purple-500 underline text-3xl"
-					colorClassNames="bg-auto">
+					class='absolute left-6 top-6 text-gray-300 hover:text-purple-500 underline text-3xl'
+					colorClassNames='bg-auto'>
 					← Re-roll
 				</Button>
 			</div>
@@ -322,7 +350,7 @@ const App = () => {
 	)
 }
 
-// hack so that keys are unique and keys of visible items stay the same between renders to keep them mounted
+// hack so that keys are unique and keys of visible items stay the same between renders
 let acc = 0
 const mapKeys = (games: SteamGame[]): SteamGame[] => {
 	for (let i = 0; i < games.length; i++) {
@@ -347,13 +375,24 @@ const Games = ({
 
 	const handleRoll = () => {
 		setIsRolling(true)
-		setGameView(visibleGames[62])
+		setGameView(visibleGames[52])
 		setTimeout(() => {
-			setVisibleGames([...visibleGames.slice(-5), ...mapKeys(randomSubarray(games, 60))])
-			setIsRolling(false)
+			gameRevealSound.play()
 			onRollEnd()
-		}, 5100)
+
+			// Timeout so that it doesn't rerender such a big list during transition to GameView which would cause stuttering
+			setTimeout(() => {
+				setVisibleGames([...visibleGames.slice(-5), ...mapKeys(randomSubarray(games, 50))])
+				setIsRolling(false)
+			}, 1000)
+		}, 5000)
 	}
+
+	useLayoutEffect(() => {
+		if (isRolling) {
+			playRollSound()
+		}
+	}, [isRolling])
 
 	useLayoutEffect(() => {
 		if (games) {
@@ -369,9 +408,9 @@ const Games = ({
 				if (visibleGames.length) {
 					return visibleGames
 						.slice(0, 5)
-						.concat(mapKeys(randomSubarray(filteredGames, 60)))
+						.concat(mapKeys(randomSubarray(filteredGames, 50)))
 				}
-				return mapKeys(randomSubarray(filteredGames, 65))
+				return mapKeys(randomSubarray(filteredGames, 55))
 			})
 		}
 	}, [games, selectedFilter])
@@ -392,7 +431,7 @@ const Games = ({
 			{visibleGames.length ? (
 				<div
 					style={{width: 4 * 240}}
-					class="min-h-game-preview relative mt-6 overflow-hidden">
+					class='min-h-game-preview relative mt-6 overflow-hidden'>
 					<div
 						class={classnames('flex', isRolling && 'games-rolling-animation')}
 						style={{
@@ -401,22 +440,27 @@ const Games = ({
 						{visibleGames.map((game) => (
 							<img
 								key={game.key}
-								class="h-game-preview w-game-preview min-w-game-preview object-cover"
+								class='h-game-preview w-game-preview min-w-game-preview object-cover'
 								src={game.imageUrl}
 								alt={game.name}
 							/>
 						))}
 					</div>
-					<div class="w-game-preview absolute left-1/2 top-0 h-full border-2 border-purple-700 transform -translate-x-1/2" />
-					<div class="absolute top-0 w-full h-full bg-gradient-to-r from-gray-700 to-gray-700 via-transparent" />
+					<div
+						class={classnames(
+							'absolute left-1/2 top-0 h-full border-2 border-purple-700 transform -translate-x-1/2 transition-all',
+							isRolling ? 'w-0' : 'w-game-preview'
+						)}
+					/>
+					<div class='absolute top-0 w-full h-full bg-gradient-to-r from-gray-700 to-gray-700 via-transparent' />
 				</div>
 			) : (
-				<div class="h-game-preview mt-6">None of your games match the selected filter</div>
+				<div class='h-game-preview mt-6'>None of your games match the selected filter</div>
 			)}
 			<Button
 				onClick={handleRoll}
 				disabled={isRolling || !visibleGames.length}
-				class="mt-4 w-24">
+				class='mt-4 w-24'>
 				Roll
 			</Button>
 		</div>
@@ -435,11 +479,11 @@ const ProfileUrlSubmit = ({
 	return (
 		<>
 			<TextInput
-				label="Profile URL"
-				placeholder="steamcommunity.com/id/sample"
-				inputClass="min-w-0"
-				type="text"
-				class="col-span-2 self-center"
+				label='Profile URL'
+				placeholder='steamcommunity.com/id/sample'
+				inputClass='min-w-0'
+				type='text'
+				class='col-span-2 self-center'
 				onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
 					setValue(e.currentTarget.value)
 				}
@@ -449,7 +493,7 @@ const ProfileUrlSubmit = ({
 				// Maybe add some proper validation
 				disabled={!value || isLoading}
 				onClick={() => onSubmit(value)}
-				class="self-center place-self-center mt-4 w-24">
+				class='self-center place-self-center mt-4 w-24'>
 				Load
 			</Button>
 		</>

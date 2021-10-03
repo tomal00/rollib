@@ -1,6 +1,6 @@
 import {render} from 'preact'
-import App from './components/App'
+import App from './components/app'
 
 import './styles.css'
 
-render(<App />, document.getElementById('app')!)
+render(<App />, document.getElementById('app') as Element)

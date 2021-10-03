@@ -1,4 +1,4 @@
-export default (array: any[], subArrayLength: number) => {
+export default function randomSubarray<T>(array: T[], subArrayLength: number): Array<T> {
 	const subArray = []
 
 	for (let i = 0; i < subArrayLength; i++) {

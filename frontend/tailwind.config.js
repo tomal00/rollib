@@ -9,13 +9,22 @@ module.exports = {
 						transform: 'translateX(calc(-0.5 * 240px))',
 					},
 					'100%': {
-						transform: 'translateX(calc(-60.5 * 240px))',
+						transform: 'translateX(calc(-50.5 * 240px))',
 						animationTimingFunction: 'cubic-bezier(0,0,0.33,1)',
+					},
+				},
+				expand: {
+					'0%, 50%, 100%': {
+						transform: 'scale(1)',
+					},
+					'75%': {
+						transform: 'scale(1.25)',
 					},
 				},
 			},
 			animation: {
 				roll: 'roll 5s',
+				expand: 'expand 8s infinite',
 			},
 			height: {
 				144: '36rem',

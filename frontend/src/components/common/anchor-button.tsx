@@ -5,15 +5,15 @@ type Props = {
 	colorClassNames?: string
 }
 
-const Button = ({colorClassNames, ...rest}: Props): JSX.Element => (
-	<button
+const AnchorButton = ({colorClassNames, ...rest}: Props): JSX.Element => (
+	<a
 		{...rest}
 		class={classnames(
-			'p-2 transition-colors disabled:cursor-not-allowed',
+			'p-2 transition-colors disabled:cursor-not-allowed inline-block',
 			colorClassNames || 'disabled:bg-gray-400 bg-purple-500 hover:bg-purple-700',
 			rest.class
 		)}
 	/>
 )
 
-export default Button
+export default AnchorButton

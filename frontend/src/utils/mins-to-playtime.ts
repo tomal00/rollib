@@ -1,6 +1,6 @@
-export default (minutesPlayed: number) => {
+export default (minutesPlayed: number): string => {
 	if (minutesPlayed < 120) {
-		if (minutesPlayed === 1) return `1 minute`
+		if (minutesPlayed === 1) return '1 minute'
 
 		return `${minutesPlayed} minutes`
 	}

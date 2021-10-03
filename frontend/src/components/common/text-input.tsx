@@ -8,7 +8,7 @@ type Props = {
 	[key: string]: any
 }
 
-const TextInput = ({label, inputClass, ...props}: Props) => {
+const TextInput = ({label, inputClass, ...props}: Props): JSX.Element => {
 	const [id] = useState<string | undefined>(label ? () => randomId(10) : undefined)
 
 	return (
@@ -24,11 +24,11 @@ const TextInput = ({label, inputClass, ...props}: Props) => {
 					!!label && 'mt-1',
 					inputClass
 				)}
-				type="text"
+				type='text'
 				id={id}
 			/>
 			{label && (
-				<label for={id} class="text-current text-xs transition-colors">
+				<label for={id} class='text-current text-xs transition-colors'>
 					{label}
 				</label>
 			)}

@@ -25,13 +25,13 @@
 	.scrollbar::-webkit-scrollbar-track {
 		@apply bg-purple-400;
 	}
-	
+
 	.scrollbar::-webkit-scrollbar {
 		@apply bg-transparent;
 		width: 4px;
 		height: 12px;
 	}
-	
+
 	.scrollbar::-webkit-scrollbar-thumb {
 		@apply bg-purple-600;
 	}
