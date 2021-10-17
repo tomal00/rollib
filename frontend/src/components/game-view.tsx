@@ -6,9 +6,10 @@ import {SteamGame, StoreAsset, StoreInfo} from '@Types/steam'
 import minsToPlaytime from '@Utils/mins-to-playtime'
 import steamLogo from '@Assets/steam-logo.svg'
 import playIcon from '@Assets/play.svg'
+import {apiUrl} from '@Config'
 
 const fetchGameStoreInfo = (appId: number): Promise<StoreInfo> =>
-	fetch(`http://localhost:3000/dev/store-info?appId=${appId}`, {cache: 'force-cache'})
+	fetch(`${apiUrl}/dev/store-info?appId=${appId}`, {cache: 'force-cache'})
 		.then((res) => res.json().then((data) => ({status: res.status, data})))
 		.then(({status, data}) => {
 			if (status >= 400) throw new Error(data.message)

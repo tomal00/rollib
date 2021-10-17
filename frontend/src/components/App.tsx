@@ -14,6 +14,7 @@ import {soundContext} from '@Utils/sound'
 import useLocalStorage from '@Utils/use-local-storage'
 import useWindowSize from '@Utils/use-window-size'
 import logo from '@Assets/logo.svg'
+import {apiUrl} from '@Config'
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -26,7 +27,7 @@ const queryClient = new QueryClient({
 })
 
 const fetchSteamProfile = (profileUrl: string): Promise<SteamProfile> =>
-	fetch(`http://127.0.0.1:3000/dev/steam-profile?profileUrl=${profileUrl}`)
+	fetch(`${apiUrl}/steam-profile?profileUrl=${profileUrl}`)
 		.then((res) => res.json().then((data) => ({status: res.status, data})))
 		.then(({status, data}) => {
 			if (status >= 400) throw new Error(data.message)

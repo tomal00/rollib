@@ -11,7 +11,7 @@ export default defineConfig({
 			'@Types': path.resolve('./src/types'),
 			'@Hooks': path.resolve('./src/hooks'),
 			'@Components': path.resolve('./src/components'),
-			'@Root': path.resolve('./src'),
+			'@Config': path.resolve('./config.json'),
 			'@Utils': path.resolve('./src/utils'),
 			react: 'preact/compat',
 			'react-dom/test-utils': 'preact/test-utils',

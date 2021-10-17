@@ -25,8 +25,8 @@
 			"@Hooks/*": ["./src/hooks/*"],
 			"@Utils/*": ["./src/utils/*"],
 			"@Components/*": ["./src/components/*"],
-			"@Root/*": ["./src/*"]
+			"@Config": ["./config.json"]
 		}
 	},
-	"include": ["src"]
+	"include": ["src", "config.json"]
 }

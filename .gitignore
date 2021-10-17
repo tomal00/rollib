@@ -106,5 +106,6 @@ dist
 .webpack
 
 serverless/config.json
+frontend/config.json
 
 .DS_Store

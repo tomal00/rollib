@@ -1,2 +1,2 @@
-(cd ./frontend; npm i)
 (cd ./serverless; npm i && node createConfig)
+(cd ./frontend; npm i && node createConfig)
