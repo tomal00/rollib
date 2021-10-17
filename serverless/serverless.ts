@@ -3,7 +3,7 @@ import type {AWS} from '@serverless/typescript'
 import getSteamProfile from '@functions/getSteamProfile'
 import getGameStoreInfo from '@functions/getGameStoreInfo'
 
-import config from './config'
+import * as config from './config.json'
 
 const serverlessConfiguration: AWS = {
 	service: 'serverless',
@@ -24,6 +24,7 @@ const serverlessConfiguration: AWS = {
 		},
 		environment: {
 			STEAM_API_KEY: config.steamApiKey,
+			CORS: config.cors,
 		},
 		lambdaHashingVersion: '20201221',
 	},

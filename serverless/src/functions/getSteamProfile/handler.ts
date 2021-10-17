@@ -46,7 +46,6 @@ const getSteamProfile: ValidatedEventAPIGatewayProxyEvent<null> = async (event) 
 				},
 			},
 		] = await Promise.all([
-			// TODO - handle private profile
 			fetch(
 				`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${process.env.STEAM_API_KEY}&steamid=${steamId}&include_appinfo=true`
 			).then((res) => {
@@ -67,37 +66,25 @@ const getSteamProfile: ValidatedEventAPIGatewayProxyEvent<null> = async (event) 
 			throw UNAVAILABLE_LIBRARY
 		}
 
-		return formatJSONResponse(
-			{
-				steamProfile: {
-					games: games.map(({appid, img_icon_url, name, playtime_forever}) => ({
-						appId: appid,
-						iconUrl: `http://media.steampowered.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`,
-						imageUrl: `https://steamcdn-a.akamaihd.net/steam/apps/${appid}/header.jpg`,
-						name,
-						url: `https://store.steampowered.com/app/${appid}`,
-						playTime: playtime_forever,
-					})),
-					displayName: personaname,
-					avatar: avatarfull,
-				},
+		return formatJSONResponse({
+			steamProfile: {
+				games: games.map(({appid, img_icon_url, name, playtime_forever}) => ({
+					appId: appid,
+					iconUrl: `http://media.steampowered.com/steamcommunity/public/images/apps/${appid}/${img_icon_url}.jpg`,
+					imageUrl: `https://steamcdn-a.akamaihd.net/steam/apps/${appid}/header.jpg`,
+					name,
+					url: `https://store.steampowered.com/app/${appid}`,
+					playTime: playtime_forever,
+				})),
+				displayName: personaname,
+				avatar: avatarfull,
 			},
-			{
-				headers: {
-					'Cache-control': 'public;max-age=604800',
-				},
-			}
-		)
+		})
 	} catch (e) {
 		return formatJSONResponse(
 			{message: e.message},
 			{
 				statusCode: e === INVALID_PROFILE_URL_ERR || e === UNAVAILABLE_LIBRARY ? 400 : 500,
-				// TODO - Is this even an issue?
-				// So that changes in steam lib visibility are reflected
-				headers: {
-					'Cache-Control': 'no-store',
-				},
 			}
 		)
 	}

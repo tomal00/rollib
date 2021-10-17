@@ -56,8 +56,8 @@ export default function Filter({selectedFilter, setSelectedFilter}: Props): JSX.
 			</FilterOption>
 			<FilterOption
 				isSelected={typeof selectedFilter === 'number'}
-				onSelect={() => setSelectedFilter(PlaytimeFilter.UNPLAYED_ONLY)}>
-				<label for='max-hours' class='text-inherit block text-xs'>
+				onSelect={() => setSelectedFilter(maxHours)}>
+				<label for='max-hours' class='text-inherit block text-xs cursor-pointer'>
 					Max hours
 				</label>
 				<input

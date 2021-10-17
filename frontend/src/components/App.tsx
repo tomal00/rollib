@@ -7,11 +7,13 @@ import ProfileCard, {ProfileSubmit} from '@Components/profile-card'
 import GameStrip from '@Components/game-strip'
 import Info from '@Components/info'
 import Section, {SectionPosition} from '@Components/section'
+import GithubIcon from '@Components/common/github-icon'
 import SoundToggle from '@Components/sound-toggle'
 import {SteamGame, SteamProfile} from '@Types/steam'
 import {soundContext} from '@Utils/sound'
 import useLocalStorage from '@Utils/use-local-storage'
 import useWindowSize from '@Utils/use-window-size'
+import logo from '@Assets/logo.svg'
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -119,6 +121,16 @@ function DesktopApp({setProfileUrl, steamProfile, isLoading}: AppProps): JSX.Ele
 					← Re-roll
 				</Button>
 			</Section>
+			<div class='fixed bottom-0 left-0 flex items-end justify-between p-4 w-full'>
+				<img src={logo} class='h-8' />
+				<a
+					target='_blank'
+					rel='noopener'
+					href='https://github.com/tomal00/rollib'
+					class='text-purple-300 hover:text-purple-500 cursor-pointer transition-colors'>
+					<GithubIcon color='inherit' height='32' width='32' />
+				</a>
+			</div>
 		</soundContext.Provider>
 	)
 }
@@ -141,23 +153,9 @@ function App(): JSX.Element {
 		}
 	)
 
-	if (width < 1024) {
-		return (
-			<MobileApp
-				isLoading={isLoading}
-				steamProfile={steamProfile}
-				setProfileUrl={setProfileUrl}
-			/>
-		)
-	}
+	const App = width < 640 ? MobileApp : DesktopApp
 
-	return (
-		<DesktopApp
-			isLoading={isLoading}
-			steamProfile={steamProfile}
-			setProfileUrl={setProfileUrl}
-		/>
-	)
+	return <App isLoading={isLoading} steamProfile={steamProfile} setProfileUrl={setProfileUrl} />
 }
 
 const WithQueryClient = (Component: FunctionalComponent) => (props: any) =>

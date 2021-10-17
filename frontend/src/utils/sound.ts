@@ -11,7 +11,7 @@ export enum Sound {
 
 const rollAudioBreakpoints = rollBreakpoints.map((timeout) => {
 	const sound = new Audio(rollSfx)
-	sound.volume = 0.2
+	sound.volume = 0.15
 	return {
 		timeout,
 		sound,
@@ -19,7 +19,7 @@ const rollAudioBreakpoints = rollBreakpoints.map((timeout) => {
 })
 
 const gameRevealSound = new Audio(gameRevealSfx)
-gameRevealSound.volume = 0.2
+gameRevealSound.volume = 0.15
 
 export const soundContext = createContext<[boolean, StateUpdater<boolean>]>([false, () => null])
 

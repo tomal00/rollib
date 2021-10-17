@@ -9,7 +9,6 @@ export type ValidatedEventAPIGatewayProxyEvent<S> = Handler<
 	APIGatewayProxyResult
 >
 
-// TODO - CORS
 export const formatJSONResponse = (
 	response: Record<string, unknown>,
 	opts?: {
@@ -20,6 +19,6 @@ export const formatJSONResponse = (
 	return {
 		statusCode: opts?.statusCode || 200,
 		body: JSON.stringify(response),
-		headers: opts?.headers,
+		headers: {...opts?.headers, 'Access-Control-Allow-Origin': process.env.CORS},
 	}
 }

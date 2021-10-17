@@ -36,7 +36,7 @@ export default function GameView({game, isVisible}: Props): JSX.Element {
 			},
 		}
 	)
-	const previewProps = {style: {height: 331, width: 589}, height: 331, width: 589} // damn you tailwind
+
 	useEffect(() => {
 		if (isVisible) {
 			setTimeout(() => activeVideoRef.current?.play(), 750)
@@ -58,7 +58,7 @@ export default function GameView({game, isVisible}: Props): JSX.Element {
 				<img class='mb-6 mt-6 w-auto h-auto' src={game.imageUrl} />
 				<div class='w-96'>
 					Unfortunately this product seems not to be available in the steam store at this
-					moment and so it's not possible to display any further info
+					moment and thus it's not possible to display any further info.
 				</div>
 				<div class='text-center'>
 					<AnchorButton
@@ -71,27 +71,32 @@ export default function GameView({game, isVisible}: Props): JSX.Element {
 		)
 	}
 
+	const activePreviewClassNames =
+		'w-active-preview h-active-preview max-h-active-preview col-span-4 row-span-4'
+
 	return (
-		<div class='grid gap-6 grid-cols-6 max-w-4xl auto-rows-auto'>
+		<div class='grid gap-6 grid-cols-6 m-3 max-w-4xl auto-rows-auto'>
 			<div class='col-span-6 text-3xl'>{game.name}</div>
 			{activePreview?.type === 'video' ? (
 				<video
 					ref={activeVideoRef}
 					key={activePreview?.id}
-					class='col-span-4 row-span-4'
+					class={classnames(activePreviewClassNames, 'bg-black')}
 					controls
 					playsInline
-					muted
-					{...previewProps}>
+					muted>
 					<source src={activePreview?.url} type='video/webm' />
 				</video>
 			) : (
-				<img {...previewProps} class='col-span-4 row-span-4' src={activePreview?.url} />
+				<img
+					class={classnames(activePreviewClassNames, 'object-cover')}
+					src={activePreview?.url}
+				/>
 			)}
 			<div class='flex flex-col col-span-2 row-span-4'>
 				<img class='mb-3' src={game.imageUrl} />
 				<div
-					class='line-clamp-6 mb-3 text-sm'
+					class='line-clamp-6 mb-2 text-sm'
 					// Special characters :/ - sanitized by BE just in case
 					dangerouslySetInnerHTML={{__html: description}}
 				/>

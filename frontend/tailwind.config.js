@@ -9,7 +9,7 @@ module.exports = {
 						transform: 'translateX(calc(-0.5 * 240px))',
 					},
 					'100%': {
-						transform: 'translateX(calc(-50.5 * 240px))',
+						transform: 'translateX(calc(-40.5 * 240px))',
 						animationTimingFunction: 'cubic-bezier(0,0,0.33,1)',
 					},
 				},
@@ -22,22 +22,31 @@ module.exports = {
 					},
 				},
 			},
+			spacing: {
+				'game-preview': '240px',
+				'game-preview-4': '960px',
+				'game-preview-2': '480px',
+				'active-preview': '589px',
+				'-game-preview-1/2': '-120px',
+				'xs-1/2': '16rem',
+				144: '36rem',
+			},
+			minWidth: {
+				'game-preview': '240px',
+			},
 			animation: {
 				roll: 'roll 5s',
 				expand: 'expand 8s infinite',
 			},
 			height: {
-				144: '36rem',
 				'game-preview': '112px',
+				'active-preview': '331px',
 			},
 			minHeight: {
 				'game-preview': '112px',
 			},
-			width: {
-				'game-preview': '240px',
-			},
-			minWidth: {
-				'game-preview': '240px',
+			maxHeight: {
+				'active-preview': '331px',
 			},
 			textColor: {
 				inherit: 'inherit',

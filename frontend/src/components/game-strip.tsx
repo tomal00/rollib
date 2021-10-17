@@ -30,14 +30,14 @@ export default function GameStrip({games, onRollEnd, setGameView}: Props): JSX.E
 
 	const handleRoll = () => {
 		setIsRolling(true)
-		setGameView(visibleGames[52])
+		setGameView(visibleGames[42])
 		setTimeout(() => {
 			playSound(Sound.REVEAL)
 			onRollEnd()
 
 			// Timeout so that it doesn't rerender such a big list during transition to GameView which would cause stuttering
 			setTimeout(() => {
-				setVisibleGames([...visibleGames.slice(-5), ...mapKeys(randomSubarray(games, 50))])
+				setVisibleGames([...visibleGames.slice(-5), ...mapKeys(randomSubarray(games, 40))])
 				setIsRolling(false)
 			}, 1000)
 		}, 5000)
@@ -63,9 +63,9 @@ export default function GameStrip({games, onRollEnd, setGameView}: Props): JSX.E
 				if (visibleGames.length) {
 					return visibleGames
 						.slice(0, 5)
-						.concat(mapKeys(randomSubarray(filteredGames, 50)))
+						.concat(mapKeys(randomSubarray(filteredGames, 40)))
 				}
-				return mapKeys(randomSubarray(filteredGames, 55))
+				return mapKeys(randomSubarray(filteredGames, 45))
 			})
 		}
 	}, [games, selectedFilter])
@@ -80,18 +80,16 @@ export default function GameStrip({games, onRollEnd, setGameView}: Props): JSX.E
 				<Filter selectedFilter={selectedFilter} setSelectedFilter={setSelectedFilter} />
 			</div>
 			{visibleGames.length ? (
-				<div
-					style={{width: 4 * 240}}
-					class='min-h-game-preview relative mt-6 overflow-hidden'>
+				<div class='min-h-game-preview w-game-preview-2 lg:w-game-preview-4 relative mt-6 overflow-hidden'>
 					<div
-						class={classnames('flex', isRolling && 'games-rolling-animation')}
-						style={{
-							transform: 'translateX(calc(-0.5 * 240px)',
-						}}>
+						class={classnames(
+							'flex transform -translate-x-game-preview-1/2 relative lg:right-0 right-game-preview',
+							isRolling && 'games-rolling-animation'
+						)}>
 						{visibleGames.map((game) => (
 							<img
 								key={game.key}
-								class='h-game-preview w-game-preview min-w-game-preview object-cover'
+								class='h-game-preview min-w-game-preview object-cover'
 								src={game.imageUrl}
 								alt={game.name}
 							/>

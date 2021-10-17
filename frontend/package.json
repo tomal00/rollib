@@ -2,10 +2,11 @@
 	"name": "vite-project",
 	"version": "0.0.0",
 	"scripts": {
-		"dev": "vite",
-		"build": "tsc && vite build",
+		"dev": "node generateRollBreakpoints && vite --port 3001",
+		"build": "node generateRollBreakpoints && tsc && vite build",
 		"serve": "vite preview",
-		"lint": "npx eslint src/*"
+		"lint": "npx eslint src/*",
+		"generate-breakpoints": "node generateRollBreakpoints"
 	},
 	"dependencies": {
 		"@types/lodash": "^4.14.170",

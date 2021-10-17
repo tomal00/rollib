@@ -50,17 +50,10 @@ const getGameStoreInfo: ValidatedEventAPIGatewayProxyEvent<null> = async (event)
 				type: 'video',
 			})) || []
 
-		return formatJSONResponse(
-			{
-				description: sanitizeHtml(description, {allowedTags: [], allowedAttributes: {}}),
-				assets: videos.concat(images),
-			},
-			{
-				headers: {
-					'Cache-control': 'public;max-age=604800',
-				},
-			}
-		)
+		return formatJSONResponse({
+			description: sanitizeHtml(description, {allowedTags: [], allowedAttributes: {}}),
+			assets: videos.concat(images),
+		})
 	} catch (e) {
 		return formatJSONResponse(
 			{message: e.message},

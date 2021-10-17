@@ -27,7 +27,6 @@ export function ProfileSubmit({onSubmit, isLoading}: ProfileSubmitProps): JSX.El
 				value={value}
 			/>
 			<Button
-				// Maybe add some proper validation
 				disabled={!value || isLoading}
 				onClick={() => onSubmit(value)}
 				class='self-center place-self-center mt-4 w-24'>
@@ -57,18 +56,16 @@ export default function ProfileCard({isLoading, steamProfile, setProfileUrl}: Pr
 				width={128}
 			/>
 			<div
-				style={{maxWidth: 256}}
 				class={classnames(
-					'col-span-2 text-2xl truncate',
+					'col-span-2 text-2xl truncate max-w-xs-1/2',
 					!steamProfile && 'opacity-30',
 					isLoading && 'animate-pulse'
 				)}>
 				{steamProfile?.displayName || '[Your steam nickname]'}
 			</div>
 			<div
-				style={{maxWidth: 256}}
 				class={classnames(
-					'col-span-2 text-base',
+					'col-span-2 text-base max-w-xs-1/2',
 					!steamProfile && 'opacity-30',
 					isLoading && 'animate-pulse'
 				)}>
