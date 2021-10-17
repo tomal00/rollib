@@ -17,7 +17,7 @@ export function ProfileSubmit({onSubmit, isLoading}: ProfileSubmitProps): JSX.El
 		<>
 			<TextInput
 				label='Profile URL'
-				placeholder='steamcommunity.com/id/sample'
+				placeholder='steamcommunity.com/id/sample-id'
 				inputClass='min-w-0'
 				type='text'
 				class='col-span-2 self-center'
