@@ -1,9 +1,9 @@
 export default function Info(): JSX.Element {
 	return (
 		<section class='px-6 py-12'>
-			<h2>What is [insert name]?</h2>
+			<h2>What is Rollib?</h2>
 			<p>
-				[insert name] is a tool which you can use to randomly select a game
+				Rollib is a tool which you can use to randomly select a game
 				<br />
 				from your steam library.
 			</p>
