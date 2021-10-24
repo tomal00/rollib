@@ -6,7 +6,7 @@ import getGameStoreInfo from '@functions/getGameStoreInfo'
 import * as config from './config.json'
 
 const serverlessConfiguration: AWS = {
-	service: 'serverless',
+	service: 'rollib',
 	frameworkVersion: '2',
 	custom: {
 		webpack: {
@@ -27,6 +27,8 @@ const serverlessConfiguration: AWS = {
 			CORS: config.cors,
 		},
 		lambdaHashingVersion: '20201221',
+		// @ts-ignore
+		region: config.region,
 	},
 	// import the function via paths
 	functions: {getSteamProfile, getGameStoreInfo},

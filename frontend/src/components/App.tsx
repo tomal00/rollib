@@ -161,7 +161,7 @@ function App(): JSX.Element {
 
 const WithQueryClient = (Component: FunctionalComponent) => (props: any) =>
 	(
-		<QueryClientProvider client={queryClient} r>
+		<QueryClientProvider client={queryClient}>
 			<Component {...props} />
 		</QueryClientProvider>
 	)
