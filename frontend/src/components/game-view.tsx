@@ -9,7 +9,7 @@ import playIcon from '@Assets/play.svg'
 import {apiUrl} from '@Config'
 
 const fetchGameStoreInfo = (appId: number): Promise<StoreInfo> =>
-	fetch(`${apiUrl}/dev/store-info?appId=${appId}`, {cache: 'force-cache'})
+	fetch(`${apiUrl}/store-info?appId=${appId}`, {cache: 'force-cache'})
 		.then((res) => res.json().then((data) => ({status: res.status, data})))
 		.then(({status, data}) => {
 			if (status >= 400) throw new Error(data.message)
