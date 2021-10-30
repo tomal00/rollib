@@ -46,7 +46,7 @@ const getGameStoreInfo: ValidatedEventAPIGatewayProxyEvent<null> = async (event)
 			movies?.map(({id, thumbnail, webm}) => ({
 				id,
 				thumbnail,
-				url: webm['480'],
+				url: webm['480'].replace('http://', 'https://'),
 				type: 'video',
 			})) || []
 
