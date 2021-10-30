@@ -30,14 +30,14 @@ export default function GameStrip({games, onRollEnd, setGameView}: Props): JSX.E
 
 	const handleRoll = () => {
 		setIsRolling(true)
-		setGameView(visibleGames[42])
+		setGameView(visibleGames[32])
 		setTimeout(() => {
 			playSound(Sound.REVEAL)
 			onRollEnd()
 
 			// Timeout so that it doesn't rerender such a big list during transition to GameView which would cause stuttering
 			setTimeout(() => {
-				setVisibleGames([...visibleGames.slice(-5), ...mapKeys(randomSubarray(games, 40))])
+				setVisibleGames([...visibleGames.slice(-5), ...mapKeys(randomSubarray(games, 30))])
 				setIsRolling(false)
 			}, 1000)
 		}, 5000)
@@ -63,9 +63,9 @@ export default function GameStrip({games, onRollEnd, setGameView}: Props): JSX.E
 				if (visibleGames.length) {
 					return visibleGames
 						.slice(0, 5)
-						.concat(mapKeys(randomSubarray(filteredGames, 40)))
+						.concat(mapKeys(randomSubarray(filteredGames, 30)))
 				}
-				return mapKeys(randomSubarray(filteredGames, 45))
+				return mapKeys(randomSubarray(filteredGames, 35))
 			})
 		}
 	}, [games, selectedFilter])

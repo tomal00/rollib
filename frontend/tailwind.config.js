@@ -9,7 +9,7 @@ module.exports = {
 						transform: 'translateX(calc(-0.5 * 240px))',
 					},
 					'100%': {
-						transform: 'translateX(calc(-40.5 * 240px))',
+						transform: 'translateX(calc(-30.5 * 240px))',
 						animationTimingFunction: 'cubic-bezier(0,0,0.33,1)',
 					},
 				},
