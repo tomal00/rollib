@@ -1,4 +1,4 @@
-import {useLayoutEffect, useState} from 'preact/hooks'
+import {useEffect, useState} from 'preact/hooks'
 import {FunctionalComponent} from 'preact'
 import {useQuery, QueryClient, QueryClientProvider} from 'react-query'
 import Button from '@Components/common/button'
@@ -48,7 +48,7 @@ type AppProps = {
 function MobileApp({setProfileUrl, steamProfile, isLoading}: AppProps): JSX.Element {
 	const [gameView, setGameView] = useState<null | SteamGame>(null)
 
-	useLayoutEffect(() => {
+	useEffect(() => {
 		if (steamProfile) {
 			setGameView(steamProfile.games[Math.floor(Math.random() * steamProfile.games.length)])
 		}

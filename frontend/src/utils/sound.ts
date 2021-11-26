@@ -28,12 +28,12 @@ export const usePlaySound = (): ((sound: Sound) => void) => {
 
 	return (sound: Sound): void => {
 		if (!isEnabled) return
+
 		if (sound === Sound.ROLL) {
 			rollAudioBreakpoints.forEach(({timeout, sound}) => {
 				setTimeout(() => sound.play(), timeout)
 			})
-		}
-		if (sound === Sound.REVEAL) {
+		} else if (sound === Sound.REVEAL) {
 			gameRevealSound.play()
 		}
 	}

@@ -1,4 +1,4 @@
-import {useLayoutEffect, useState} from 'preact/hooks'
+import {useEffect, useState, useMemo} from 'preact/hooks'
 import classnames from 'classnames'
 import Button from '@Components/common/button'
 import Filter, {PlaytimeFilter, PlaytimeFilterT} from '@Components/filter'
@@ -28,6 +28,16 @@ export default function GameStrip({games, onRollEnd, setGameView}: Props): JSX.E
 	const [isRolling, setIsRolling] = useState(false)
 	const playSound = usePlaySound()
 
+	const filteredGames = useMemo(
+		() =>
+			games.filter(({playTime}) => {
+				if (selectedFilter === PlaytimeFilter.ALL) return true
+				if (selectedFilter === PlaytimeFilter.UNPLAYED_ONLY && !playTime) return true
+				if (typeof selectedFilter === 'number') return playTime <= selectedFilter * 60
+			}),
+		[games, selectedFilter]
+	)
+
 	const handleRoll = () => {
 		setIsRolling(true)
 		setGameView(visibleGames[32])
@@ -37,38 +47,32 @@ export default function GameStrip({games, onRollEnd, setGameView}: Props): JSX.E
 
 			// Timeout so that it doesn't rerender such a big list during transition to GameView which would cause stuttering
 			setTimeout(() => {
-				setVisibleGames([...visibleGames.slice(-5), ...mapKeys(randomSubarray(games, 30))])
+				setVisibleGames([
+					...visibleGames.slice(-5),
+					...mapKeys(randomSubarray(filteredGames, 30)),
+				])
 				setIsRolling(false)
 			}, 1000)
 		}, 5000)
 	}
 
-	useLayoutEffect(() => {
+	useEffect(() => {
 		if (isRolling) {
 			playSound(Sound.ROLL)
 		}
 	}, [isRolling])
 
-	useLayoutEffect(() => {
-		if (games) {
-			setVisibleGames((visibleGames) => {
-				const filteredGames = games.filter(({playTime}) => {
-					if (selectedFilter === PlaytimeFilter.ALL) return true
-					if (selectedFilter === PlaytimeFilter.UNPLAYED_ONLY && !playTime) return true
-					if (typeof selectedFilter === 'number') return playTime <= selectedFilter * 60
-				})
-				if (!filteredGames.length) {
-					return []
-				}
-				if (visibleGames.length) {
-					return visibleGames
-						.slice(0, 5)
-						.concat(mapKeys(randomSubarray(filteredGames, 30)))
-				}
-				return mapKeys(randomSubarray(filteredGames, 35))
-			})
-		}
-	}, [games, selectedFilter])
+	useEffect(() => {
+		setVisibleGames((visibleGames) => {
+			if (!filteredGames.length) {
+				return []
+			}
+			if (visibleGames.length) {
+				return visibleGames.slice(0, 5).concat(mapKeys(randomSubarray(filteredGames, 30)))
+			}
+			return mapKeys(randomSubarray(filteredGames, 35))
+		})
+	}, [filteredGames])
 
 	return (
 		<div class='flex flex-col items-center mt-auto'>

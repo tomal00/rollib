@@ -1,4 +1,4 @@
-import {useLayoutEffect, useState, useRef, useEffect} from 'preact/hooks'
+import {useState, useRef, useEffect} from 'preact/hooks'
 import {useQuery} from 'react-query'
 import classnames from 'classnames'
 import AnchorButton from '@Components/common/anchor-button'
@@ -46,7 +46,7 @@ export default function GameView({game, isVisible}: Props): JSX.Element {
 		}
 	}, [isVisible])
 
-	useLayoutEffect(() => {
+	useEffect(() => {
 		if (activePreview?.type === 'video' && isVisible) {
 			activeVideoRef.current.play()
 		}
