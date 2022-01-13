@@ -1,5 +1,5 @@
 import {render} from 'preact'
-import App from './components/app'
+import App from '@Components/app'
 
 import './styles.css'
 
